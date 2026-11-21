@@ -86,6 +86,8 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
 .total b{font-size:22px}
 .main{width:100%;padding:13px;background:#1d5fb8;border-color:#1d5fb8;color:#fff;font-weight:700;font-size:15px}
 .main:disabled{background:#bbb;border-color:#bbb;color:#fff}
+.pamph{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;margin-bottom:4px;border-top:1px solid #f0f0f0;padding-top:4px;font-weight:700}
+.pamph .num{font-weight:400;color:#555;margin-left:6px}
 .toast{position:absolute;left:12px;right:12px;bottom:100%;margin-bottom:6px;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px}
 .toast span{flex:1}
 .toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700;min-height:32px}
@@ -168,7 +170,7 @@ const yen=v=>v.toLocaleString('ja-JP');
 let ch=1,cs=1,st,toast=null,toastTimer=null,hint=false,hintTimer=null,keep={};
 
 // ---- 状態（JSONで丸ごと写せる形。元に戻す＝写しを戻す）
-function newSt(){return {S:{},sel:[],flags:{},open:null,edit:false,view:null,addQ:{},nid:1,soldOut:{},tab:'pay',modal:false,mtab:'hist',merge:false};}
+function newSt(){return {S:{},sel:[],flags:{},open:null,edit:false,view:null,addQ:{},nid:1,soldOut:{},tab:'pay',modal:false,mtab:'hist',merge:false,pamph:0};}
 function L(m,q){return {id:st.nid++,m,q};}
 function initSt(){
   st=newSt();
@@ -264,9 +266,11 @@ function footHTML(){
   const adding=st.view&&st.view.k==='add';
   const any=Object.values(st.addQ).some(q=>q>0);
   const t=toast?`<div class="toast"><span>${toast.msg}</span><button data-a="undo">元に戻す</button></div>`:'';
-  return `<div class="foot">${t}<div class="total"><span>合計</span><b id="total">${yen(selTotal())}円</b></div>`
+  const pm=ch===3?`<div class="pamph"><span>パンフレット <span class="num">500円</span></span><span class="stp"><button data-a="pq" data-v="-1" ${st.pamph>0?'':'disabled'}>−</button><b id="pq">${st.pamph}</b><button data-a="pq" data-v="1">＋</button></span></div>`:'';
+  const canPay=(st.sel.length||(ch===3&&st.pamph>0))&&!st.view;
+  return `<div class="foot">${t}${pm}<div class="total"><span>合計</span><b id="total">${yen(selTotal()+(ch===3?500*st.pamph:0))}円</b></div>`
    +(adding?`<button class="main" data-a="adddo" ${any?'':'disabled'}>足す</button>`
-          :`<button class="main" data-a="pay" ${st.sel.length&&!st.view?'':'disabled'}>会計済みにする</button>`)+`</div>`;
+          :`<button class="main" data-a="pay" ${canPay?'':'disabled'}>会計済みにする</button>`)+`</div>`;
 }
 function payPane(){
   let top='',body='';
@@ -344,13 +348,14 @@ const A={
     else{ if(st.sel.includes(n)) removeFromSel(n);
       else TB[TOF[n]].seats.forEach(k=>{ if(S_(k).st==='unpaid'&&!st.sel.includes(k)) st.sel.push(k); }); }
   },
+  pq(v){st.pamph=Math.max(0,st.pamph+(+v));},
   merge(){st.merge=!st.merge;},
   clearsel(){st.sel=[];clearHint();},
   pay(){
-    if(!st.sel.length)return; const s=snap(), seats=selSorted();
+    if(!st.sel.length&&!(ch===3&&st.pamph>0))return; const s=snap(), seats=selSorted(), pm=ch===3?st.pamph:0;
     seats.forEach(n=>{st.S[n]={st:'empty',lines:[]};delete st.flags[n];});
-    st.sel=[];st.open=null;st.edit=false;st.view=null;st.merge=false;clearHint();
-    setToast(`席 ${seats.join('・')} を会計しました`,s);
+    st.sel=[];st.open=null;st.edit=false;st.view=null;st.merge=false;st.pamph=0;clearHint();
+    setToast(seats.length?`席 ${seats.join('・')} を会計しました`:`パンフレット ${pm} を会計しました`,s);
   },
   undo(){ if(!toast)return; st=JSON.parse(toast.s); toast=null; clearHint(); },
   q(v){const [id,d]=v.split(':').map(Number);const f=findLine(id);if(!f)return;
