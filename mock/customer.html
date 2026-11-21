@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>注文（見本）</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#fff}
+body{height:100dvh;color:#222;font-size:14px;
+  font-family:-apple-system,"Hiragino Sans","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;background:#fff;overflow:hidden}
+@media (min-width:481px){#app{border-left:1px solid #e3e3e3;border-right:1px solid #e3e3e3}}
+[hidden]{display:none!important}
+button{font:inherit;color:#222;cursor:pointer;margin:0;border:1px solid #ccc;background:#fff;border-radius:8px;padding:5px 10px;min-height:44px;line-height:1.2;white-space:nowrap}
+button:active{opacity:.8}
+button.on{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+button:disabled{color:#bbb;border-color:#e3e3e3;background:#fff;cursor:default}
+button.on:disabled{background:#bbb;border-color:#bbb;color:#fff}
+b{font-weight:700}
+.amt{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* 上の帯 */
+.hdr{flex:none;display:flex;align-items:center;gap:8px;padding:6px 12px;min-height:52px;border-bottom:1px solid #e3e3e3;background:#fff}
+.hdr .t{font-size:17px;font-weight:700}
+.hdr .seat{font-size:16px;color:#555;white-space:nowrap}
+.hdr .sp{flex:1}
+.hdr button{padding:5px 12px;font-size:15px}
+
+/* 分類の並び */
+.cats{flex:none;display:flex;gap:8px;padding:8px 12px;overflow-x:auto;overflow-y:hidden;border-bottom:1px solid #e3e3e3;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cats button{flex:none;font-size:15px;font-weight:700}
+
+/* 品の一覧 */
+#list{position:relative;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sh{display:flex;align-items:center;height:36px;padding:0 12px;font-size:13px;font-weight:700;color:#555;border-bottom:1px solid #e3e3e3}
+.row{display:flex;align-items:center;gap:8px;min-height:64px;padding:6px 8px 6px 8px;border-left:4px solid transparent;border-bottom:1px solid #f0f0f0}
+.row.sel{border-left-color:#1d5fb8}
+.row .info{flex:1;min-width:0}
+.row .nm{font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.row .pr{font-size:15px;color:#555;margin-top:2px}
+.row.so .nm,.row.so .pr{color:#bbb}
+.stp{flex:none;display:inline-flex;align-items:center}
+.stp button{width:44px;height:44px;padding:0;font-size:22px;font-weight:700}
+.stp b{width:30px;text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
+.stp b.z{color:#bbb;font-weight:400}
+.sold{flex:none;width:118px;text-align:center;color:#bbb;font-size:15px}
+#spacer{pointer-events:none}
+
+/* 下に固定 */
+.foot{position:relative;flex:none;padding:6px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e3e3e3;background:#fff}
+.foot .note{text-align:center;font-size:12px;color:#555;line-height:18px}
+.frow{display:flex;gap:8px;margin-top:4px}
+.frow .call{flex:none;width:104px;padding:0 4px;font-size:14px}
+.main{flex:1;min-width:0;min-height:52px;background:#1d5fb8;border-color:#1d5fb8;color:#fff;font-weight:700;font-size:16px}
+.main:disabled{background:#bbb;border-color:#bbb;color:#fff}
+.main span{margin-left:8px}
+.toast{position:absolute;left:12px;right:12px;bottom:100%;margin-bottom:6px;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:5}
+.toast span{flex:1;font-size:15px}
+.toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700}
+
+/* 窓 */
+.ov{position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.28);display:flex;align-items:flex-end;padding:36px 12px calc(12px + env(safe-area-inset-bottom))}
+.win{width:100%;height:min(100%,560px);display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:12px;overflow:hidden;
+  transform:translateY(28px);opacity:0;transition:transform .18s ease-out,opacity .18s ease-out}
+.ov.show .win{transform:none;opacity:1}
+.whead{flex:none;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 16px;border-bottom:1px solid #e3e3e3}
+.whead b{flex:1;font-size:17px}
+.whead button{width:48px;padding:0;font-size:18px}
+.wbody{flex:1;min-height:0;overflow-y:auto;padding:4px 16px}
+.wfoot{flex:none;padding:8px 16px 14px;border-top:1px solid #e3e3e3}
+.wfoot .total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.wfoot .total b{font-size:22px}
+.wfoot .note{text-align:center;font-size:12px;color:#555;line-height:18px;margin-top:2px}
+.big{width:100%;min-height:56px;font-size:17px;font-weight:700;background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+.big:disabled{background:#bbb;border-color:#bbb;color:#fff}
+.line{display:flex;align-items:center;gap:8px;min-height:56px;border-bottom:1px solid #f0f0f0}
+.line .nm{flex:1;min-width:0;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.line .amt{width:64px;text-align:right;font-size:15px}
+.line.z .nm,.line.z .amt{color:#bbb}
+.line .stp button{width:44px}
+.line .stp b{width:26px}
+.done{text-align:center;padding:14px 0 6px}
+.chk{width:72px;height:72px;border-radius:50%;background:#1d5fb8;color:#fff;font-size:42px;line-height:72px;margin:0 auto 8px}
+.done h2{margin:0 0 10px;font-size:22px}
+.done .lines{text-align:left;margin-bottom:12px}
+.done .lines .line{min-height:44px}
+.done p{margin:0;font-size:15px;line-height:1.6}
+.sline{display:flex;align-items:center;gap:8px;min-height:56px;border-bottom:1px solid #f0f0f0}
+.sline .nm{flex:1;min-width:0;font-size:16px;overflow-wrap:anywhere}
+.sline.dn .nm{color:#bbb}
+.tag{flex:none;width:104px;text-align:center;font-size:13px;font-weight:700;padding:5px 0;border:1px solid #ccc;border-radius:8px;color:#555}
+.tag.soon{border-color:#1d5fb8;color:#1d5fb8}
+.tag.dn{border-color:transparent;color:#bbb;font-weight:400}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <span class="t">カフェ</span><span class="seat" id="seat"></span><span class="sp"></span>
+    <button id="stat"></button>
+  </div>
+  <div class="cats" id="cats"></div>
+  <div id="list"></div>
+  <div class="foot" id="foot">
+    <div class="note">お会計は帰りにレジで</div>
+    <div class="frow">
+      <button class="call" id="call">店員を呼ぶ</button>
+      <button class="main" id="main"></button>
+    </div>
+  </div>
+  <div class="ov" id="ov" hidden>
+    <div class="win">
+      <div class="whead"><b id="wt"></b><button id="wx" aria-label="閉じる">✕</button></div>
+      <div class="wbody" id="wb"></div>
+      <div class="wfoot" id="wf"></div>
+    </div>
+  </div>
+</div>
+<script>
+// ---- 仮データ（品名と値段は register.html と同じ）
+const CATS=["Food","Hot Drink","Sweets","Ice Drink","Original Drink"];
+const ITEMS=[
+ [0,"ホットサンド",500],[0,"カレーライス",600],[0,"トースト",400],
+ [1,"コーヒー HOT",300],[1,"紅茶 HOT",300],[1,"ココア",300],[1,"カフェラテ",300],
+ [2,"マフィン",400],[2,"クッキー",300],[2,"プリン",350],
+ [3,"コーヒー ICE",300],[3,"紅茶 ICE",300],[3,"オレンジジュース",300],
+ [4,"永遠の愛",400],[4,"誰もが憧れるベリーソーダ",300],[4,"自由を求めるクリームソーダ",400],[4,"革命の歌 明日への希望を掲げて",400]
+].map((a,i)=>({id:i,cat:a[0],name:a[1],price:a[2],so:a[1]==="マフィン"}));
+const SOON_MS=10000, SEND_MS=600, CALL_MS=20000;
+const $=id=>document.getElementById(id);
+const yen=v=>v.toLocaleString('ja-JP')+"円";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const seat=(new URLSearchParams(location.search).get('seat')||'12').replace(/[^\w-]/g,'').slice(0,6)||'12';
+$('seat').textContent='席 '+seat;
+
+// ---- 状態
+const q={}; ITEMS.forEach(i=>q[i.id]=0);
+const orders=[ // {id,qty,status:'making'|'soon'|'done'}
+  {id:1,qty:2,status:'done'},   // カレーライス×2
+  {id:13,qty:3,status:'making'} // 永遠の愛×3
+];
+let win=null;        // null | 'confirm' | 'status'
+let snap=[];         // 確かめの窓を開いた時点の品
+let phase='edit';    // edit | sending | done
+let doneLines=[];
+let calling=false, callTimer=null, toastTimer=null;
+const item=id=>ITEMS[id];
+const totals=()=>{let n=0,s=0;for(const i of ITEMS){n+=q[i.id];s+=q[i.id]*i.price}return{n,s}};
+const orderedCount=()=>orders.reduce((a,o)=>a+o.qty,0);
+const orderedSum=()=>orders.reduce((a,o)=>a+o.qty*item(o.id).price,0);
+
+// ---- 分類
+$('cats').innerHTML=CATS.map((c,i)=>`<button data-c="${i}">${c}</button>`).join('');
+let activeCat=0;
+function setCat(i){
+  activeCat=i;
+  const bs=$('cats').children;
+  for(let k=0;k<bs.length;k++)bs[k].classList.toggle('on',k===i);
+  const b=bs[i],bar=$('cats'),l=b.offsetLeft,r=l+b.offsetWidth;
+  if(l<bar.scrollLeft+12)bar.scrollLeft=Math.max(0,l-12);
+  else if(r>bar.scrollLeft+bar.clientWidth-12)bar.scrollLeft=r-bar.clientWidth+12;
+}
+
+// ---- 一覧（一度だけ作り、あとは中身だけ直す）
+function stp(id,v,dis){
+  return `<span class="stp"><button data-a="-" data-id="${id}" aria-label="減らす"${v===0?' disabled':''}>−</button><b class="${v===0?'z':''}">${v}</b><button data-a="+" data-id="${id}" aria-label="増やす">＋</button></span>`;
+}
+function buildList(){
+  let h='';
+  CATS.forEach((c,ci)=>{
+    h+=`<section data-sec="${ci}"><div class="sh">${c}</div>`;
+    ITEMS.filter(i=>i.cat===ci).forEach(i=>{
+      h+=`<div class="row${i.so?' so':''}" data-row="${i.id}"><div class="info"><div class="nm">${esc(i.name)}</div><div class="pr">${yen(i.price)}</div></div>`+
+        (i.so?`<span class="sold">売り切れ</span>`:stp(i.id,0))+`</div>`;
+    });
+    h+=`</section>`;
+  });
+  h+=`<div id="spacer"></div>`;
+  $('list').innerHTML=h;
+  fixSpacer();
+}
+function fixSpacer(){
+  const secs=$('list').querySelectorAll('section'),last=secs[secs.length-1];
+  $('spacer').style.height=Math.max(0,$('list').clientHeight-last.offsetHeight)+'px';
+}
+function paintRow(id){
+  const row=$('list').querySelector(`[data-row="${id}"]`);
+  if(!row||item(id).so)return;
+  const v=q[id];
+  row.classList.toggle('sel',v>0);
+  row.querySelector('.stp').outerHTML=stp(id,v);
+}
+function paintMain(){
+  const t=totals(),m=$('main');
+  if(t.n===0){m.disabled=true;m.textContent='メニューを選んでください'}
+  else{m.disabled=false;m.innerHTML=`注文に進む<span>${t.n}点 ${yen(t.s)}</span>`}
+}
+function paintStat(){
+  const n=orderedCount(),b=$('stat');
+  b.textContent=n?`注文の状況 ${n}`:'注文の状況';
+  b.disabled=n===0;
+}
+function change(id,d){
+  if(item(id).so)return;
+  q[id]=Math.max(0,q[id]+d);
+  paintRow(id);paintMain();
+  if(win==='confirm'&&phase==='edit')paintConfirm();
+}
+$('list').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-a]');if(!b||b.disabled)return;
+  change(+b.dataset.id,b.dataset.a==='+'?1:-1);
+});
+$('cats').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-c]');if(!b)return;
+  const i=+b.dataset.c,sec=$('list').querySelector(`[data-sec="${i}"]`);
+  $('list').scrollTop=sec.offsetTop;
+  setCat(i);
+});
+$('list').addEventListener('scroll',()=>{
+  const y=$('list').scrollTop+8,secs=$('list').querySelectorAll('section');
+  let a=0;secs.forEach((s,i)=>{if(s.offsetTop<=y)a=i});
+  if(a!==activeCat)setCat(a);
+},{passive:true});
+addEventListener('resize',fixSpacer);
+
+// ---- 窓
+function openWin(kind){
+  if(win)return;
+  win=kind;
+  $('ov').hidden=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('ov').classList.add('show')));
+}
+function closeWin(){
+  if(!win||phase==='sending')return;
+  win=null;phase='edit';
+  $('ov').classList.remove('show');$('ov').hidden=true;
+}
+$('wx').onclick=closeWin;
+$('ov').addEventListener('click',e=>{if(e.target===$('ov'))closeWin()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeWin()});
+
+function openConfirm(){
+  if(totals().n===0)return;
+  snap=ITEMS.filter(i=>q[i.id]>0).map(i=>i.id);
+  phase='edit';
+  openWin('confirm');paintConfirm();
+}
+function paintConfirm(){
+  $('wt').textContent='注文の確認';
+  const body=$('wb'),top=body.scrollTop,t=totals();
+  body.innerHTML=snap.map(id=>{
+    const i=item(id),v=q[id];
+    return `<div class="line${v===0?' z':''}"><span class="nm">${esc(i.name)}</span>${stp(id,v)}<span class="amt">${yen(v*i.price)}</span></div>`;
+  }).join('');
+  body.scrollTop=top;
+  $('wf').innerHTML=`<div class="total"><span>合計</span><b class="amt">${yen(t.s)}</b></div><button class="big" id="go"${t.n===0?' disabled':''}>注文する</button>`;
+  $('go').onclick=send;
+  $('wb').querySelectorAll('button[data-a]').forEach(b=>b.onclick=()=>{if(!b.disabled)change(+b.dataset.id,b.dataset.a==='+'?1:-1)});
+}
+function send(){
+  if(phase!=='edit'||totals().n===0)return;
+  phase='sending';
+  const g=$('go');g.disabled=true;g.textContent='送っています';
+  setTimeout(()=>{
+    doneLines=ITEMS.filter(i=>q[i.id]>0).map(i=>({id:i.id,qty:q[i.id]}));
+    doneLines.forEach(l=>{
+      const o={id:l.id,qty:l.qty,status:'making'};orders.push(o);
+      setTimeout(()=>{o.status='soon';if(win==='status')paintStatus()},SOON_MS);
+    });
+    ITEMS.forEach(i=>{if(q[i.id]){q[i.id]=0;paintRow(i.id)}});
+    paintMain();paintStat();
+    phase='done';paintDone();
+  },SEND_MS);
+}
+function paintDone(){
+  $('wt').textContent='注文の確認';
+  $('wb').innerHTML=`<div class="done"><div class="chk">✓</div><h2>注文しました</h2><div class="lines">`+
+    doneLines.map(l=>`<div class="line"><span class="nm">${esc(item(l.id).name)}</span><span class="amt">×${l.qty}</span></div>`).join('')+
+    `</div><p>お席でお待ちください。お会計は帰りにレジで</p></div>`;
+  $('wb').scrollTop=0;
+  $('wf').innerHTML=`<button class="big" id="cls">閉じる</button>`;
+  $('cls').onclick=closeWin;
+}
+function openStatus(){
+  if(orderedCount()===0)return;
+  openWin('status');paintStatus();
+}
+const TAG={making:['作っています',''],soon:['まもなくお届け','soon'],done:['お届け済み','dn']};
+function paintStatus(){
+  $('wt').textContent='注文の状況';
+  const body=$('wb'),top=body.scrollTop;
+  body.innerHTML=orders.map(o=>{
+    const t=TAG[o.status];
+    return `<div class="sline${o.status==='done'?' dn':''}"><span class="nm">${esc(item(o.id).name)} ×${o.qty}</span><span class="tag ${t[1]}">${t[0]}</span></div>`;
+  }).join('');
+  body.scrollTop=top;
+  $('wf').innerHTML=`<div class="total"><span>合計</span><b class="amt">${yen(orderedSum())}</b></div><div class="note">お会計は帰りにレジで</div><div class="note">変更は店員へ</div>`;
+}
+$('main').onclick=openConfirm;
+$('stat').onclick=openStatus;
+
+// ---- 店員を呼ぶ
+function showToast(text,undo){
+  clearTimeout(toastTimer);
+  const old=$('foot').querySelector('.toast');if(old)old.remove();
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span>${text}</span>`+(undo?`<button id="undo">取り消す</button>`:'');
+  $('foot').appendChild(t);
+  if(undo)$('undo').onclick=()=>setCall(false,true);
+  toastTimer=setTimeout(()=>t.remove(),5000);
+}
+function setCall(on,fromToast){
+  calling=on;
+  const b=$('call');
+  b.classList.toggle('on',on);
+  b.textContent=on?'呼んでいます':'店員を呼ぶ';
+  clearTimeout(callTimer);
+  if(on){showToast('店員を呼びました',true);callTimer=setTimeout(()=>setCall(false,false),CALL_MS)}
+  else if(fromToast){showToast('取り消しました',false)}
+  else{const t=$('foot').querySelector('.toast');if(t)t.remove()}
+}
+$('call').onclick=()=>setCall(!calling,true);
+
+// ---- 起動
+buildList();setCat(0);paintMain();paintStat();
+</script>
+</body>
+</html>
