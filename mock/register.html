@@ -29,12 +29,12 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
 .edge span{width:40px;text-align:right}.edge span:first-child{text-align:left}
 .kitchen{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:8px;color:#9a9aa0;font-size:14px;background:#f8f8f9}
 .table{grid-column:var(--c);grid-row:var(--r);display:flex;flex-direction:row;gap:4px;padding:3px;border:1px solid var(--line);border-radius:10px;background:#e4e4e8;min-height:0}
-.thead{flex:none;width:40px;padding:0;font-weight:700;font-size:13px;background:#fff}
-.thead.none{color:#999;background:transparent;border-color:transparent}
+.thead{flex:none;width:22px;padding:0;font-weight:400;font-size:12px;color:var(--sub);background:#f4f4f6}
+.thead.none{color:#bbb;background:transparent;border-color:transparent}
 .thead.all{background:var(--sel);color:#fff;border-color:var(--sel)}
 .seats{flex:1;min-width:0;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}
 .seat{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;padding:0;border-radius:6px;min-height:0;min-width:0}
-.seat .n{font-size:17px;font-weight:700}
+.seat .n{font-size:20px;font-weight:700}
 .seat .a{font-size:11px;font-variant-numeric:tabular-nums}
 .seat.empty{background:#fff;color:#444}
 .seat.seated{background:#d9d9dc;color:#555;border-color:#d9d9dc}
@@ -86,7 +86,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
   .mapwrap{padding:6px}
   #map{grid-auto-rows:76px}
   .table{flex-direction:column;gap:2px;padding:2px}
-  .thead{width:auto;height:22px;font-size:12px}
+  .thead{width:auto;height:18px;font-size:11px;line-height:1}
   .seats{gap:2px}
   .seat .n{font-size:16px}.seat .a{font-size:10px}
   .pay{border-left:0;border-top:1px solid var(--line)}
@@ -110,6 +110,7 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
     <div id="map"></div>
     <div class="edge"><span></span><span></span><span>ドア</span></div>
     <div class="legend">
+      <span>[全]=机ごと選ぶ</span>
       <span><i style="background:#fff"></i>空き</span>
       <span><i style="background:#d9d9dc"></i>注文なし</span>
       <span><i style="background:var(--unpaid)"></i>未会計</span>
@@ -130,26 +131,27 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
 </main>
 <script>
 // ---- 部屋の配置（見本用）。本番では設定の表から読む想定。
-// tables: [机の名前, 列, 行, 席数]  机の名前・列・行・席数はこの配列だけで変わる（席は「机の名前-1〜」）
+// tables: [列, 行, 席数]  列・行・席数はこの配列だけで変わる（机の名前は持たない）
 // blocks: [表示名, 列, 行, 行数]  席でない場所（押せない）
 const ROOM = {
   tables: [
-    ["T3",1,1,3],["T2",2,1,3],["T1",3,1,3],
-    ["T6",1,2,3],["T5",2,2,3],["T4",3,2,3],
-    ["T9",1,3,3],["T8",2,3,3],["T7",3,3,3],
-    ["T12",1,4,3],["T11",2,4,3],["T10",3,4,3],
-    ["T15",1,5,3],["T14",2,5,3],["T13",3,5,3],
-    ["T17",2,6,3],["T16",3,6,3],
-    ["T19",2,7,3],["T18",3,7,3],
-    ["T21",2,8,3],["T20",3,8,3],
-    ["R2",2,9,3],["R1",3,9,3],
-    ["R4",2,10,3],["R3",3,10,3],
-    ["R7",2,11,3],["R5",3,11,3],   // R6 は欠番（今年の配置どおり）
-    ["R9",2,12,3],["R8",3,12,3],
+    [1,1,3],[2,1,3],[3,1,3],  [1,2,3],[2,2,3],[3,2,3],  [1,3,3],[2,3,3],[3,3,3],
+    [1,4,3],[2,4,3],[3,4,3],  [1,5,3],[2,5,3],[3,5,3],
+    [2,6,3],[3,6,3],  [2,7,3],[3,7,3],  [2,8,3],[3,8,3],
+    [2,9,3],[3,9,3],  [2,10,3],[3,10,3],  [2,11,3],[3,11,3],  [2,12,3],[3,12,3],
   ],
   blocks: [["キッチン",1,8,5]],
 };
-const SEATS = ROOM.tables.flatMap(t=>Array.from({length:t[3]},(_,i)=>t[0]+"-"+(i+1)));
+// 席番号の振り方（設定で変えられる想定）: 前の行から後ろへ、同じ行は左の机から右へ、机の中は左の席から右へ。
+function numberSeats(tables){
+  let k = 0;
+  return tables.map((t,i)=>({i, c:t[0], r:t[1], n:t[2]}))
+    .sort((a,b)=>a.r-b.r || a.c-b.c)
+    .map(t=>({...t, seats: Array.from({length:t.n},()=>String(++k))}))
+    .sort((a,b)=>a.i-b.i);
+}
+const TB = numberSeats(ROOM.tables);                 // 机ごとの {列,行,席の配列}
+const SEATS = TB.flatMap(t=>t.seats).sort((a,b)=>a-b);   // 席番号（文字列）の昇順
 const ORD = Object.fromEntries(SEATS.map((n,i)=>[n,i]));
 const MENU = [["永遠の愛",400],["誰もが憧れるベリーソーダ",300],["自由を求めるクリームソーダ",400],["革命の歌 明日への希望を掲げて",400],
   ["コーヒー HOT",300],["コーヒー ICE",300],["紅茶 HOT",300],["紅茶 ICE",300],["ココア",300],["カフェラテ",300],
@@ -163,9 +165,9 @@ function init(){
   S = {}; selected = new Set(); lastPaid = null; confirmRow = null; resetMode = false;
   const order = ROOM.tables.map((_,i)=>i).sort(()=>r()-.5);
   const pOf = {}; order.forEach((ti,k)=>{ pOf[ti] = k<14 ? .95 : k<20 ? .55 : .05; });
-  ROOM.tables.forEach((t,ti)=>{
+  TB.forEach((t,ti)=>{
     const fav = [pick(15), pick(15)];            // 同じ卓は似た注文
-    SEATS.filter(n=>n.startsWith(t[0]+'-')).forEach(n=>{
+    t.seats.forEach(n=>{
       const x = r(); let st = 'empty', lines = [];
       if (x < pOf[ti]) {
         st = 'unpaid';
@@ -180,7 +182,7 @@ function init(){
     });
   });
   // 会計中（もう1台のレジ）: 同じ卓の2席
-  const bt = SEATS.filter(n=>n.startsWith(ROOM.tables[order[0]][0]+'-'));
+  const bt = TB[order[0]].seats;
   [bt[0], bt[1]].forEach(n=>{ if (!S[n].lines.length) S[n].lines=[{m:pick(15),q:1}]; S[n].st='busy'; });
   render();
 }
@@ -193,22 +195,21 @@ function render(){
   const u = unpaidSeats();
   document.getElementById('topSum').innerHTML = `未会計 <b>${u.length}</b>席 <b>${yen(u.reduce((s,n)=>s+sub(n),0))}</b>円`;
   // マップ
-  document.getElementById('map').innerHTML = ROOM.blocks.map(([nm,c,r,sp])=>`<div class="kitchen" style="grid-column:${c};grid-row:${r} / span ${sp}">${nm}</div>`).join('') + ROOM.tables.map(([no,c,r,cnt])=>{
-    const seats = SEATS.filter(n=>n.startsWith(no+'-'));
+  document.getElementById('map').innerHTML = ROOM.blocks.map(([nm,c,r,sp])=>`<div class="kitchen" style="grid-column:${c};grid-row:${r} / span ${sp}">${nm}</div>`).join('') + TB.map(({i:ti,c,r,seats})=>{
     const un = seats.filter(n=>S[n].st==='unpaid');
     const all = un.length && un.every(n=>selected.has(n));
     const hc = !un.length ? 'none' : all ? 'all' : '';
     return `<div class="table" style="--c:${c};--r:${r}">
-      <button class="thead ${hc}" data-a="table" data-v="${no}" ${un.length?'':'disabled'}>${all?'✓ ':''}${no}</button>
+      <button class="thead ${hc}" data-a="table" data-v="${ti}" title="この机をまとめて選ぶ" ${un.length?'':'disabled'}>${all?'✓':'全'}</button>
       <div class="seats">${seats.map(n=>{
         const s=S[n], on=selected.has(n);
-        const inner = `<span class="n">${n.split('-')[1]}</span>` + (s.st==='unpaid'?`<span class="a">${yen(sub(n))}</span>`:s.st==='busy'?`<span class="a">🔒</span>`:'');
+        const inner = `<span class="n">${n}</span>` + (s.st==='unpaid'?`<span class="a">${yen(sub(n))}</span>`:s.st==='busy'?`<span class="a">🔒</span>`:'');
         return `<button class="seat ${s.st} ${on?'on':''}" data-a="seat" data-v="${n}" ${s.st==='unpaid'?'':'disabled'}>${inner}</button>`;
       }).join('')}</div></div>`;
   }).join('');
   // お知らせ（会計しました）
   document.getElementById('notice').innerHTML = lastPaid
-    ? `<div class="done"><span>✓ 会計しました　${lastPaid.seats.map(x=>x.n).join('・')}　${yen(lastPaid.total)}円</span><button data-a="undo">取り消す</button></div>` : '';
+    ? `<div class="done"><span>✓ 会計しました　席${lastPaid.seats.map(x=>x.n).join('・')}　${yen(lastPaid.total)}円</span><button data-a="undo">取り消す</button></div>` : '';
   // 会計の欄
   const sel = [...selected].sort((a,b)=>ORD[a]-ORD[b]);
   const total = sel.reduce((s,n)=>s+sub(n),0);
@@ -219,15 +220,15 @@ function render(){
          <button data-a="resetKeep">未会計の席は残して、ほかを空に戻す</button>
          <button class="danger" data-a="resetAll">全部を空に戻す</button>
          <button data-a="resetNo">やめる</button>
-         ${u.map(n=>`<div class="row"><span class="nm">${n}</span><span class="num">${yen(sub(n))}円</span></div>`).join('')}`
+         ${u.map(n=>`<div class="row"><span class="nm">席 ${n}</span><span class="num">${yen(sub(n))}円</span></div>`).join('')}`
       : `<h2>全席を空に戻しますか</h2>
          <button class="danger" data-a="resetAll">全席を空に戻す</button>
          <button data-a="resetNo">やめる</button>`) + `</div>`;
   } else if (!sel.length) {
     h = `<div class="hint">席を押してください</div><div class="list">` +
-      u.map(n=>`<button class="item" data-a="seat" data-v="${n}"><span>${n}</span><span class="num">${yen(sub(n))}円</span></button>`).join('') + `</div>`;
+      u.map(n=>`<button class="item" data-a="seat" data-v="${n}"><span>席 ${n}</span><span class="num">${yen(sub(n))}円</span></button>`).join('') + `</div>`;
   } else {
-    h = sel.map(n=>`<div class="card"><h3><span>${n}</span><span class="num">${yen(sub(n))}円</span></h3>` +
+    h = sel.map(n=>`<div class="card"><h3><span>席 ${n}</span><span class="num">${yen(sub(n))}円</span></h3>` +
       S[n].lines.map((l,i)=>{
         const key = n+':'+i, amt = MENU[l.m][1]*l.q;
         const tail = confirmRow===key
@@ -246,7 +247,7 @@ function render(){
 const A = {
   seat(v){ if(S[v].st!=='unpaid')return; resetMode=false; confirmRow=null; selected.has(v)?selected.delete(v):selected.add(v); },
   table(v){ resetMode=false; confirmRow=null;
-    const t=SEATS.filter(n=>n.startsWith(v+'-')&&S[n].st==='unpaid');
+    const t=TB[v].seats.filter(n=>S[n].st==='unpaid');
     const all=t.length&&t.every(n=>selected.has(n)); t.forEach(n=>all?selected.delete(n):selected.add(n)); },
   clear(){ selected.clear(); confirmRow=null; },
   pay(){
