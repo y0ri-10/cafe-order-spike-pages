@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キッチン（見本）</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#fff}
+body{height:100dvh;display:flex;flex-direction:column;color:#222;font-size:14px;
+  font-family:-apple-system,"Hiragino Sans","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+#root{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+[hidden]{display:none!important}
+button{font:inherit;color:#222;cursor:pointer;margin:0;border:1px solid #ccc;background:#fff;border-radius:8px;padding:5px 10px;min-height:36px;line-height:1.2;white-space:nowrap}
+button:active{opacity:.8}
+button.on{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+b{font-weight:700}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* 上の帯 */
+.hdr{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:6px 12px;border-bottom:1px solid #e3e3e3;min-height:50px;background:#fff}
+.hdr .t{font-size:16px;font-weight:700}
+.hdr .sum{color:#555;white-space:nowrap}
+.hdr .sum b{font-size:18px;color:#222}
+.hdr .sp{flex:1}
+.wgrp{display:flex;align-items:center;gap:6px}
+.wgrp small{font-size:11px;color:#888;margin-right:2px}
+.wgrp button{min-height:36px;padding:3px 9px}
+
+/* 持ち場 */
+.stn{flex:none;display:flex;gap:8px;padding:8px 12px;overflow-x:auto;overflow-y:hidden;border-bottom:1px solid #e3e3e3;scrollbar-width:none}
+.stn::-webkit-scrollbar{display:none}
+.stn button{flex:none;min-height:44px;font-weight:700;font-size:15px}
+.stn small{font-size:12px;font-weight:400;margin-left:4px;min-width:1ch;display:inline-block}
+
+main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 220px}
+.list{min-height:0;overflow-y:auto;padding:10px 12px 70px;display:flex;flex-direction:column;gap:10px}
+.empty{color:#bbb;text-align:center;padding:40px 0;font-size:16px}
+.grp{flex:none;border:1px solid #ccc;border-radius:8px;padding:8px 10px 10px;background:#fff}
+.grp.first{border:3px solid #1d5fb8;padding:6px 8px 8px}
+.grp.fresh{background:#e8f0fb}
+.gh{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.gh .nx{font-size:11px;font-weight:700;color:#1d5fb8;align-self:flex-start;margin-top:3px}
+.gh .gname{flex:1;min-width:0;font-size:20px;font-weight:700}
+.gh .gcnt{font-size:28px;font-weight:700;line-height:1}
+.gh .gcnt.z{color:#bbb}
+.toks{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.tok{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;min-height:52px;padding:6px 10px;border-radius:8px;text-align:left}
+.tok .sn{font-size:18px;font-weight:700}
+.tok .q{font-weight:700;font-size:16px}
+.tok .mn{margin-left:auto;color:#555}
+.tok .mn.late{color:#d32f2f;font-weight:700}
+.tok em{flex-basis:100%;font-style:normal;color:#d32f2f;font-size:12px;font-weight:700}
+.tok.fresh{background:#e8f0fb}
+.tok.done{background:#f3f3f3;border-color:#e3e3e3}
+.tok.done .sn,.tok.done .q,.tok.done .mn,.tok.done em{color:#bbb;font-weight:400}
+
+.side{border-left:1px solid #e3e3e3;padding:10px 14px;overflow-y:auto;min-height:0}
+.side h3{margin:0 0 6px;font-size:13px;font-weight:400;color:#555}
+.sr{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0}
+.sr b{font-size:16px}
+
+.toast{position:absolute;left:12px;right:12px;bottom:12px;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:30}
+.toast span{flex:1}
+.toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700;min-height:40px}
+
+/* 売り切れの窓 */
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.28);display:flex;padding:28px 40px;z-index:10}
+.win{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:12px;overflow:hidden}
+.whead{flex:none;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-bottom:1px solid #e3e3e3}
+.whead b{flex:1;font-size:16px}
+.whead button{width:48px;padding:0}
+.wcont{flex:1;min-height:0;overflow-y:auto;padding:8px 14px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;min-height:50px;gap:8px}
+.srow.h{color:#555;font-size:13px;border:0;padding-top:14px;min-height:0}
+.srow .s{flex:1}
+.srow.so .s{color:#bbb}
+.srow .tag{width:64px;color:#d32f2f;font-weight:700;font-size:13px;text-align:center}
+.sob{width:92px;padding:3px 6px;min-height:44px;font-size:14px}
+
+@media (max-width:700px){
+  main{grid-template-columns:1fr}
+  .side{display:none}
+  .hdr{padding:4px 8px;gap:4px 8px}
+  .hdr .sp{display:none}
+  .hdr .so-btn{margin-left:auto}
+  .wgrp{order:5;flex-basis:100%}
+  .wgrp button{flex:1;padding:3px 4px}
+  .wgrp small{margin-right:4px}
+  .stn{padding:6px 8px}
+  .list{padding:8px 8px 70px}
+  .ov{padding:10px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ---- 仮データ（品名・5分類は customer.html / register.html と同じ）
+const CATS=["Food","Hot Drink","Sweets","Ice Drink","Original Drink"];
+const MENU=[[0,"ホットサンド"],[0,"カレーライス"],[0,"トースト"],
+  [1,"コーヒー HOT"],[1,"紅茶 HOT"],[1,"ココア"],[1,"カフェラテ"],
+  [2,"マフィン"],[2,"クッキー"],[2,"プリン"],
+  [3,"コーヒー ICE"],[3,"紅茶 ICE"],[3,"オレンジジュース"],
+  [4,"永遠の愛"],[4,"誰もが憧れるベリーソーダ"],[4,"自由を求めるクリームソーダ"],[4,"革命の歌 明日への希望を掲げて"]];
+// [何分前に入ったか, 席, 品, 数]（入れ替え直後を模して、9〜12分前に13行が固まる）
+const SEED=[[11.6,12,3,1],[10.4,7,0,1],[9.8,31,3,2],[9.7,18,6,1],[9.6,12,7,1],[9.5,44,3,1],[9.4,7,10,1],[9.3,25,0,1],[9.2,31,13,1],[9.1,50,3,1],[9.08,18,8,2],[9.05,3,4,1],[9.02,44,12,1],
+  [7.8,25,10,2],[6.9,39,3,1],[6.0,3,1,1],[5.2,52,14,1],[4.1,39,6,1],[3.3,60,15,1],[2.4,52,7,1],[1.5,14,3,1],[0.7,14,0,1]];
+const NEWQ=[[27,3,1],[8,0,1],[33,3,1],[41,6,2],[19,10,1],[56,15,1],[22,7,1],[8,13,1],[47,3,1],[36,12,1]];
+const WS=[[0,"来た順"],[2,"2分"],[5,"5分"],[Infinity,"全部"]];
+const MIN=60000, FRESH_MS=3000, GONE_MS=1500;
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---- 状態
+let rows=[], layout=[], W=2, stn=-1, nextId=1, newIdx=0;
+let soldOut={}, modal=false, toast=null, toastTimer=null;
+const timers={};
+
+/* ============================================================
+ * 作る順を出す決まり（この見本でいちばん大事な所）
+ *  1. まだ「できた」でない行を、時刻の古い順に並べる
+ *  2. いちばん古い行 L を取り、L と同じ品で L の時刻から W 分以内の行を全部まとめて1かたまり
+ *  3. 残りで 2 を繰り返す
+ *  4. かたまりは、中でいちばん古い行の時刻順に上から並べる（待ちの長い物が上に来る）
+ * W=0 なら同じ時刻の同じ品だけがまとまる（実質、来た順）。W=Infinity なら品ごとに1つ。
+ * ============================================================ */
+function buildGroups(todo,W){
+  let rest=todo.slice().sort((a,b)=>a.at-b.at||a.id-b.id);          // 1
+  const out=[];
+  while(rest.length){                                                 // 3
+    const L=rest[0],g=[],keep=[];
+    for(const r of rest){
+      if(r.item===L.item&&r.at-L.at<=W*MIN)g.push(r);else keep.push(r); // 2
+    }
+    out.push(g);rest=keep;
+  }
+  return out.sort((a,b)=>a[0].at-b[0].at||a[0].id-b[0].id);           // 4
+}
+
+// 持ち場で絞った行だけで並べ直す。「できた」にした行は、同じ品のかたまりへ戻して薄く残す
+function regroup(){
+  const inStn=r=>stn<0||MENU[r.item][0]===stn;
+  const groups=buildGroups(rows.filter(r=>!r.done&&inStn(r)),W);
+  rows.filter(r=>r.done&&!r.gone&&inStn(r)).forEach(d=>{
+    let best=null,bd=Infinity;
+    groups.forEach(g=>{if(g[0].item!==d.item)return;const x=Math.abs(g[0].at-d.at);if(x<bd){bd=x;best=g;}});
+    if(best)best.push(d);else groups.push([d]);
+  });
+  groups.forEach(g=>g.sort((a,b)=>a.at-b.at||a.id-b.id));
+  const key=g=>{const u=g.filter(r=>!r.done);return (u.length?u:g)[0].at;};
+  groups.sort((a,b)=>key(a)-key(b));
+  layout=groups.map(g=>g.map(r=>r.id));
+  armTimers();
+}
+const byId=id=>rows.find(r=>r.id===id);
+
+// 札が全部済んだかたまりは1.5秒後に消す（その間は戻せる）。消えるときに並べ直す
+function armTimers(){
+  layout.forEach(ids=>{
+    const k=ids.join(',');
+    if(ids.every(id=>byId(id).done)){
+      if(!timers[k])timers[k]=setTimeout(()=>{
+        delete timers[k];
+        const cur=layout.find(x=>x.join(',')===k);
+        if(cur&&cur.every(id=>byId(id).done)){cur.forEach(id=>{byId(id).gone=true;});regroup();render();}
+      },GONE_MS);
+    }else if(timers[k]){clearTimeout(timers[k]);delete timers[k];}
+  });
+}
+
+// ---- 集計
+const left=r=>r.done?0:r.q;
+const total=pred=>rows.reduce((s,r)=>s+(pred(r)?left(r):0),0);
+const stnCount=c=>total(r=>c<0||MENU[r.item][0]===c);
+
+function seed(){
+  const t0=Date.now();
+  rows=SEED.map(([ago,seat,item,q])=>({id:nextId++,seat:String(seat),item,q,at:t0-ago*MIN,done:false,gone:false,fresh:0}));
+  regroup();
+}
+function addNew(){
+  if(newIdx>=NEWQ.length)return;
+  const [seat,item,q]=NEWQ[newIdx++],now=Date.now();
+  rows.push({id:nextId++,seat:String(seat),item,q,at:now,done:false,gone:false,fresh:now+FRESH_MS});
+  regroup();render();
+  setTimeout(render,FRESH_MS+50);
+}
+
+function setToast(msg,undo){
+  toast={msg,undo};clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{toast=null;render();},4500);
+}
+
+// ---- 描画（作り直さず、変わった所だけ直す）
+function morph(a,b){
+  const ac=a.childNodes,bc=b.childNodes;
+  for(let i=0;i<bc.length;i++){
+    if(i>=ac.length){a.appendChild(bc[i].cloneNode(true));continue;}
+    const x=ac[i],y=bc[i];
+    if(x.nodeType!==y.nodeType||x.nodeName!==y.nodeName){x.replaceWith(y.cloneNode(true));continue;}
+    if(x.nodeType===3){if(x.nodeValue!==y.nodeValue)x.nodeValue=y.nodeValue;continue;}
+    for(const at of [...x.attributes])if(!y.hasAttribute(at.name))x.removeAttribute(at.name);
+    for(const at of [...y.attributes])if(x.getAttribute(at.name)!==at.value)x.setAttribute(at.name,at.value);
+    morph(x,y);
+  }
+  while(a.childNodes.length>bc.length)a.removeChild(a.lastChild);
+}
+const mins=r=>Math.max(0,Math.floor((Date.now()-r.at)/MIN));
+function tokHTML(r){
+  const m=mins(r),so=soldOut[r.item]&&!r.done,fr=r.fresh>Date.now();
+  return `<button class="tok ${r.done?'done':''} ${fr&&!r.done?'fresh':''}" data-a="tok" data-v="${r.id}">`
+    +`<span class="sn">${r.done?'✓ ':''}席 ${esc(r.seat)}</span><span class="q">×${r.q}</span><span class="mn num ${m>=10&&!r.done?'late':''}">${m}分</span>`
+    +(so?`<em>売り切れ</em>`:'')+`</button>`;
+}
+function listHTML(){
+  if(!layout.length)return `<div class="empty">注文はありません</div>`;
+  return layout.map((ids,gi)=>{
+    const rs=ids.map(byId),rem=rs.reduce((s,r)=>s+left(r),0);
+    const fr=rs.every(r=>r.fresh>Date.now()&&!r.done);
+    return `<div class="grp ${gi===0?'first':''} ${fr?'fresh':''}" data-g="${gi}">`
+      +`<div class="gh">${gi===0?'<span class="nx">次</span>':''}<span class="gname">${esc(MENU[rs[0].item][1])}</span><span class="gcnt num ${rem?'':'z'}">×${rem}</span></div>`
+      +`<div class="toks">${rs.map(tokHTML).join('')}</div></div>`;
+  }).join('');
+}
+function sideHTML(){
+  const c={};
+  rows.forEach(r=>{if(!r.done&&(stn<0||MENU[r.item][0]===stn))c[r.item]=(c[r.item]||0)+r.q;});
+  const items=Object.entries(c).sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
+  return `<h3>品ごとのあと数</h3>`+items.map(([i,q])=>`<div class="sr"><span>${esc(MENU[i][1])}</span><b class="num">${q}</b></div>`).join('');
+}
+function soldHTML(){
+  let h='';
+  CATS.forEach((c,ci)=>{
+    h+=`<div class="srow h"><span>${c}</span></div>`;
+    MENU.forEach((m,i)=>{
+      if(m[0]!==ci)return;const o=soldOut[i];
+      h+=`<div class="srow ${o?'so':''}"><span class="s">${esc(m[1])}</span><span class="tag">${o?'売り切れ':''}</span><button class="sob ${o?'on':''}" data-a="so" data-v="${i}">${o?'戻す':'売り切れ'}</button></div>`;
+    });
+  });
+  return h;
+}
+function render(){
+  const root=document.getElementById('root'),t=document.createElement('div');
+  const stnBtns=[[-1,"全部"],...CATS.map((c,i)=>[i,c])].map(([k,n])=>`<button class="${stn===k?'on':''}" data-a="stn" data-v="${k}">${n}<small class="num">${stnCount(k)}</small></button>`).join('');
+  t.innerHTML=`<div class="hdr"><span class="t">キッチン</span><span class="sum">あと <b class="num" id="total">${stnCount(-1)}</b></span><span class="sp"></span>`
+    +`<span class="wgrp"><small>見本用</small>${WS.map(([w,n])=>`<button class="${W===w?'on':''}" data-a="w" data-v="${w}">${n}</button>`).join('')}</span>`
+    +`<button class="so-btn" data-a="sopen">売り切れ</button></div>`
+    +`<div class="stn">${stnBtns}</div>`
+    +`<main><div class="list" id="list">${listHTML()}</div><aside class="side">${sideHTML()}</aside></main>`
+    +(toast?`<div class="toast"><span>${esc(toast.msg)}</span><button data-a="undo">元に戻す</button></div>`:'')
+    +(modal?`<div class="ov"><div class="win"><div class="whead"><b>売り切れ</b><button data-a="mclose">✕</button></div><div class="wcont">${soldHTML()}</div></div></div>`:'');
+  morph(root,t);
+}
+
+// ---- 操作
+function toggleTok(id){
+  const r=byId(id);if(!r)return null;
+  r.done=!r.done;
+  // 消えていた行を戻したら、一覧に無いので並べ直す
+  if(!r.done&&r.gone){r.gone=false;if(!layout.some(g=>g.includes(r.id)))regroup();}
+  armTimers();return r;
+}
+function toggleSo(i){if(soldOut[i])delete soldOut[i];else soldOut[i]=true;}
+const A={
+  tok(id){
+    const r=toggleTok(+id);if(!r)return;
+    const nm=`席 ${r.seat} ${MENU[r.item][1]}`;
+    setToast(r.done?`${nm} ができました`:`${nm} を戻しました`,()=>toggleTok(+id));
+  },
+  undo(){if(!toast)return;const f=toast.undo;toast=null;clearTimeout(toastTimer);f();},
+  w(v){W=+v;regroup();},
+  stn(v){stn=+v;regroup();},
+  sopen(){modal=true;},
+  mclose(){modal=false;},
+  so(v){
+    const i=+v;toggleSo(i);
+    setToast(`${MENU[i][1]} を${soldOut[i]?'売り切れにしました':'戻しました'}`,()=>toggleSo(i));
+  },
+};
+document.addEventListener('click',e=>{
+  const ov=e.target.closest('.ov');
+  if(ov&&e.target===ov){modal=false;render();return;}
+  const b=e.target.closest('[data-a]');
+  if(!b||b.disabled)return;
+  A[b.dataset.a](b.dataset.v);render();
+});
+window.__kt={rows:()=>rows,layout:()=>layout};
+seed();render();
+setInterval(addNew,8000);
+setInterval(render,5000);
+</script>
+</body>
+</html>
