@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カフェ注文 試作</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<h1>カフェ注文 試作　席 <span id="seat">?</span></h1>
+<div id="msg" class="msg"></div>
+<div id="menu">読み込み中…</div>
+<button id="go" class="big" disabled>注文する</button>
+<h1>この席の注文</h1>
+<div id="mine"></div>
+<script src="config.js"></script>
+<script>
+const DB = CFG.DB_URL, $ = id => document.getElementById(id);
+const seat = parseInt(new URLSearchParams(location.search).get("seat"), 10) || 0;
+$("seat").textContent = seat || "?";
+const qty = {}; let menu = {}, rid = null, sending = false;
+const STX = {new: "受付", ready: "できた", served: "届けた"};
+const say = (t, bad) => { $("msg").textContent = t; $("msg").className = "msg" + (bad ? " err" : ""); };
+const newId = () => "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+function drawMenu() {
+  let h = "", cat = "";
+  Object.keys(menu).sort().forEach(id => {
+    const m = menu[id];
+    if (m.cat !== cat) { cat = m.cat; h += `<div class="cat">${cat}</div>`; }
+    h += `<div class="item"><span>${m.name} ${m.price}円</span><span>
+      <button data-id="${id}" data-d="-1">−</button><b id="q${id}">${qty[id] || 0}</b><button data-id="${id}" data-d="1">＋</button></span></div>`;
+  });
+  $("menu").innerHTML = h;
+}
+$("menu").onclick = e => {
+  const b = e.target.closest("button"); if (!b || sending) return;
+  const id = b.dataset.id; qty[id] = Math.max(0, Math.min(9, (qty[id] || 0) + +b.dataset.d));
+  $("q" + id).textContent = qty[id];
+  $("go").disabled = !Object.values(qty).some(v => v > 0);
+};
+async function loadMenu() {
+  try { menu = await (await fetch(`${DB}/spike/menu.json`)).json() || {}; drawMenu(); }
+  catch (e) { say("メニューを読めません：" + e.message, true); }
+}
+$("go").onclick = async () => {
+  if (sending || !seat) return say(seat ? "" : "席番号がありません", true);
+  sending = true; $("go").disabled = true; $("go").textContent = "送信中"; say("送信中…");
+  rid = rid || newId();   // 失敗して押し直しても同じ ID → 二重にならない
+  const body = { ["orders/" + rid]: { seat, at: { ".sv": "timestamp" } } };
+  let n = 0;
+  Object.keys(qty).filter(id => qty[id] > 0).forEach(id => {
+    body["lines/" + rid + "-" + (++n)] = { orderId: rid, seat, itemId: id, name: menu[id].name, qty: qty[id],
+      price: menu[id].price, status: "new", createdAt: { ".sv": "timestamp" } };
+  });
+  try {
+    const r = await fetch(`${DB}/spike.json`, { method: "PATCH", body: JSON.stringify(body) });
+    if (r.ok) say("注文を受け付けました");
+    else if (r.status === 401) say("この注文はすでに受け付け済みです");   // 同じ ID の再送は規則で弾かれる
+    else throw new Error(r.status + " " + await r.text());
+    Object.keys(qty).forEach(k => qty[k] = 0); rid = null; drawMenu(); poll();
+  } catch (e) { say("送れませんでした：" + e.message + "（もう一度押せます）", true); $("go").disabled = false; }
+  sending = false; $("go").textContent = "注文する";
+};
+async function poll() {
+  if (!seat) return;
+  try {
+    const d = await (await fetch(`${DB}/spike/lines.json?orderBy="seat"&equalTo=${seat}`)).json() || {};
+    $("mine").innerHTML = Object.values(d).sort((a, b) => a.createdAt - b.createdAt)
+      .map(l => `<div class="row"><span>${l.name} ×${l.qty}</span><span class="st">${STX[l.status]}</span></div>`).join("") || "まだありません";
+  } catch (e) { /* 次の回で再取得 */ }
+}
+loadMenu(); poll(); setInterval(poll, 5000);
+</script></body></html>

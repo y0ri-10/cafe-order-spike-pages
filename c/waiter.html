@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カフェ注文 試作 ウェイター</title><link rel="stylesheet" href="style.css"></head>
+<body><h1>ウェイター <span id="conn" class="st">…</span></h1>
+<div id="msg" class="msg"></div><div id="rows"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="config.js"></script><script src="staff.js"></script>
+<script>
+watch(ls => {
+  $("rows").innerHTML = ls.filter(l => l.status === "ready").sort((a, b) => a.readyAt - b.readyAt).map(l =>
+    `<div class="row"><span>${l.name} ×${l.qty}　席${l.seat}</span>
+    <button data-id="${l.id}" onclick="setStatus('${l.id}','served','servedAt')">届けた</button></div>`).join("") || "待ちなし";
+});
+</script></body></html>

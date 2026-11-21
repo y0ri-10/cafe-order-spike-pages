@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カフェ注文 試作 キッチン</title><link rel="stylesheet" href="style.css"></head>
+<body class="wide"><h1>キッチン <span id="conn" class="st">…</span></h1>
+<div id="msg" class="msg"></div><div id="sum" class="sum"></div><div id="rows"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="config.js"></script><script src="staff.js"></script>
+<script>
+watch(ls => {
+  const nw = ls.filter(l => l.status === "new").sort((a, b) => a.createdAt - b.createdAt), t = {};
+  nw.forEach(l => t[l.name] = (t[l.name] || 0) + l.qty);
+  $("sum").innerHTML = Object.entries(t).map(([n, q]) => `<span>${n} あと${q}</span>`).join("") || "待ちなし";
+  $("rows").innerHTML = nw.map(l => `<div class="row"><span>${l.name} ×${l.qty}　席${l.seat}　${hhmm(l.createdAt)}</span>
+    <button data-id="${l.id}" onclick="setStatus('${l.id}','ready','readyAt')">できた</button></div>`).join("");
+});
+</script></body></html>
