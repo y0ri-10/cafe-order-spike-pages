@@ -7,92 +7,115 @@
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;background:#fff}
-body{height:100dvh;color:#222;font-size:14px;
+html{font-size:100%}
+body{height:100dvh;color:#222;font-size:1rem;
   font-family:-apple-system,"Hiragino Sans","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
 #app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;background:#fff;overflow:hidden}
 @media (min-width:481px){#app{border-left:1px solid #e3e3e3;border-right:1px solid #e3e3e3}}
 [hidden]{display:none!important}
-button{font:inherit;color:#222;cursor:pointer;margin:0;border:1px solid #ccc;background:#fff;border-radius:8px;padding:5px 10px;min-height:44px;line-height:1.2;white-space:nowrap}
+button{font:inherit;color:#222;cursor:pointer;margin:0;border:1px solid #999;background:#fff;border-radius:8px;padding:5px 10px;min-height:48px;line-height:1.2;white-space:nowrap}
 button:active{opacity:.8}
 button.on{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
-button:disabled{color:#bbb;border-color:#e3e3e3;background:#fff;cursor:default}
-button.on:disabled{background:#bbb;border-color:#bbb;color:#fff}
+button:disabled{color:#6e6e6e;border-color:#bbb;background:#fff;cursor:default}
 b{font-weight:700}
 .amt{font-variant-numeric:tabular-nums;white-space:nowrap}
 
 /* 上の帯 */
-.hdr{flex:none;display:flex;align-items:center;gap:8px;padding:6px 12px;min-height:52px;border-bottom:1px solid #e3e3e3;background:#fff}
-.hdr .t{font-size:17px;font-weight:700}
-.hdr .seat{font-size:16px;color:#555;white-space:nowrap}
+.hdr{flex:none;display:flex;align-items:center;gap:8px;padding:4px 12px;min-height:56px;border-bottom:1px solid #e3e3e3;background:#fff}
+.hdr .t{font-size:1.125rem;font-weight:700}
+.hdr .seat{font-size:1.0625rem;color:#444;white-space:nowrap}
 .hdr .sp{flex:1}
-.hdr button{padding:5px 12px;font-size:15px}
+.hdr button{padding:5px 12px;font-size:1rem;font-weight:700}
 
-/* 分類の並び */
-.cats{flex:none;display:flex;gap:8px;padding:8px 12px;overflow-x:auto;overflow-y:hidden;border-bottom:1px solid #e3e3e3;scrollbar-width:none}
+/* 分類の並び＋見本用の切り替え */
+.cbar{flex:none;display:flex;align-items:stretch;border-bottom:1px solid #e3e3e3}
+.cats{flex:1;min-width:0;display:flex;gap:8px;padding:8px 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
-.cats button{flex:none;font-size:15px;font-weight:700}
+.cats button{flex:none;font-size:1.0625rem;font-weight:700}
+.mode{flex:none;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:4px 8px;border-left:1px solid #e3e3e3}
+.mode i{font-style:normal;font-size:.6875rem;color:#555;text-align:center;line-height:1}
+.mode div{display:flex;gap:4px}
+.mode button{width:46px;min-height:38px;padding:0;font-size:.9375rem;font-weight:700}
 
 /* 品の一覧 */
 #list{position:relative;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-.sh{display:flex;align-items:center;height:36px;padding:0 12px;font-size:13px;font-weight:700;color:#555;border-bottom:1px solid #e3e3e3}
-.row{display:flex;align-items:center;gap:8px;min-height:64px;padding:6px 8px 6px 8px;border-left:4px solid transparent;border-bottom:1px solid #f0f0f0}
-.row.sel{border-left-color:#1d5fb8}
-.row .info{flex:1;min-width:0}
-.row .nm{font-size:16px;line-height:1.3;overflow-wrap:anywhere}
-.row .pr{font-size:15px;color:#555;margin-top:2px}
-.row.so .nm,.row.so .pr{color:#bbb}
-.stp{flex:none;display:inline-flex;align-items:center}
-.stp button{width:44px;height:44px;padding:0;font-size:22px;font-weight:700}
-.stp b{width:30px;text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
-.stp b.z{color:#bbb;font-weight:400}
-.sold{flex:none;width:118px;text-align:center;color:#bbb;font-size:15px}
+.sh{display:flex;align-items:center;height:44px;padding:0 12px;font-size:1rem;font-weight:700;color:#444;border-bottom:1px solid #e3e3e3}
+.items{display:flex;flex-direction:column;gap:8px;padding:8px 6px}
+.m2 .items{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.it{display:flex;gap:12px;padding:8px;border:3px solid #d6d6d6;border-radius:10px;background:#fff}
+.it.sel{border-color:#1d5fb8}
+.ph{flex:none;width:96px;height:96px;border-radius:6px;overflow:hidden;background:#e6e6e6}
+.ph svg{display:block;width:100%;height:100%}
+.bd{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.nm{font-size:1.25rem;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.pr{font-size:1.125rem;color:#444}
+.stp{margin-top:auto;display:inline-flex;align-items:center;gap:12px}
+.stp button{width:56px;height:56px;min-height:56px;padding:0;font-size:1.625rem;font-weight:700}
+.stp b{width:36px;text-align:center;font-size:1.375rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stp b.z{color:#6e6e6e;font-weight:400}
+.sold{margin-top:auto;min-height:56px;display:flex;align-items:center;font-size:1.125rem;font-weight:700;color:#555}
+.it.so .ph{opacity:.4}
+.it.so .nm,.it.so .pr{color:#666}
+.m2 .it{flex-direction:column;gap:6px;padding:0}
+.m2 .ph{width:100%;height:auto;aspect-ratio:4/3;border-radius:0}
+.m2 .bd{padding:0 4px 4px}
+.m2 .stp{gap:12px}
+.m2 .stp b{width:24px}
 #spacer{pointer-events:none}
 
 /* 下に固定 */
 .foot{position:relative;flex:none;padding:6px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e3e3e3;background:#fff}
-.foot .note{text-align:center;font-size:12px;color:#555;line-height:18px}
+.foot .note{text-align:center;font-size:.9375rem;color:#444;line-height:1.3}
 .frow{display:flex;gap:8px;margin-top:4px}
-.frow .call{flex:none;width:104px;padding:0 4px;font-size:14px}
-.main{flex:1;min-width:0;min-height:52px;background:#1d5fb8;border-color:#1d5fb8;color:#fff;font-weight:700;font-size:16px}
-.main:disabled{background:#bbb;border-color:#bbb;color:#fff}
-.main span{margin-left:8px}
+.frow .call{flex:none;width:7.5rem;padding:0 4px;font-size:1.0625rem;min-height:60px}
+.main{flex:1;min-width:0;min-height:60px;background:#1d5fb8;border-color:#1d5fb8;color:#fff;font-weight:700;font-size:1.1875rem;white-space:normal;line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.main:disabled{background:#e8e8e8;border-color:#ccc;color:#555}
 .toast{position:absolute;left:12px;right:12px;bottom:100%;margin-bottom:6px;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:5}
-.toast span{flex:1;font-size:15px}
+.toast span{flex:1;font-size:1.0625rem}
 .toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700}
 
 /* 窓 */
-.ov{position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.28);display:flex;align-items:flex-end;padding:36px 12px calc(12px + env(safe-area-inset-bottom))}
+.ov{position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.28);display:flex;align-items:flex-end;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
 .win{width:100%;height:min(100%,560px);display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:12px;overflow:hidden;
   transform:translateY(28px);opacity:0;transition:transform .18s ease-out,opacity .18s ease-out}
+.win.bill{height:100%}
 .ov.show .win{transform:none;opacity:1}
+@media (prefers-reduced-motion:reduce){.win{transition:none;transform:none}}
 .whead{flex:none;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 16px;border-bottom:1px solid #e3e3e3}
-.whead b{flex:1;font-size:17px}
-.whead button{width:48px;padding:0;font-size:18px}
+.whead b{flex:1;font-size:1.1875rem}
+.whead button{min-width:48px;min-height:48px;padding:0 12px;font-size:1.0625rem;font-weight:700}
+.hero{flex:none;text-align:center;padding:8px 12px 6px;border-bottom:1px solid #e3e3e3}
+.seatbig{display:flex;align-items:baseline;justify-content:center;gap:8px;line-height:1}
+.seatbig small{font-size:2rem;font-weight:700}
+.seatbig span{font-size:6rem;font-weight:700;line-height:1}
+.totbig{display:flex;align-items:baseline;justify-content:center;gap:10px;margin-top:6px;line-height:1.1}
+.totbig small{font-size:1.125rem}
+.totbig b{font-size:2.5rem;font-variant-numeric:tabular-nums}
+.hero p{margin:6px 0 0;font-size:1rem;line-height:1.35}
 .wbody{flex:1;min-height:0;overflow-y:auto;padding:4px 16px}
 .wfoot{flex:none;padding:8px 16px 14px;border-top:1px solid #e3e3e3}
-.wfoot .total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.wfoot .total b{font-size:22px}
-.wfoot .note{text-align:center;font-size:12px;color:#555;line-height:18px;margin-top:2px}
-.big{width:100%;min-height:56px;font-size:17px;font-weight:700;background:#1d5fb8;border-color:#1d5fb8;color:#fff}
-.big:disabled{background:#bbb;border-color:#bbb;color:#fff}
-.line{display:flex;align-items:center;gap:8px;min-height:56px;border-bottom:1px solid #f0f0f0}
-.line .nm{flex:1;min-width:0;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
-.line .amt{width:64px;text-align:right;font-size:15px}
-.line.z .nm,.line.z .amt{color:#bbb}
-.line .stp button{width:44px}
-.line .stp b{width:26px}
-.done{text-align:center;padding:14px 0 6px}
+.wfoot .total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:1.125rem}
+.wfoot .total b{font-size:1.625rem}
+.wfoot .note{text-align:center;font-size:1rem;color:#444;line-height:1.3}
+.big{width:100%;min-height:60px;font-size:1.1875rem;font-weight:700;background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+.big:disabled{background:#e8e8e8;border-color:#ccc;color:#555}
+.line{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:8px;row-gap:4px;padding:8px 0;border-bottom:1px solid #e3e3e3}
+.line .nm{font-size:1.125rem;font-weight:700}
+.line .amt{font-size:1.0625rem;text-align:right}
+.line .stp{grid-column:1/3;justify-self:end;margin:0}
+.line.z .nm,.line.z .amt{color:#6e6e6e;font-weight:400}
+.done{text-align:center;padding:12px 0 6px}
 .chk{width:72px;height:72px;border-radius:50%;background:#1d5fb8;color:#fff;font-size:42px;line-height:72px;margin:0 auto 8px}
-.done h2{margin:0 0 10px;font-size:22px}
-.done .lines{text-align:left;margin-bottom:12px}
-.done .lines .line{min-height:44px}
-.done p{margin:0;font-size:15px;line-height:1.6}
-.sline{display:flex;align-items:center;gap:8px;min-height:56px;border-bottom:1px solid #f0f0f0}
-.sline .nm{flex:1;min-width:0;font-size:16px;overflow-wrap:anywhere}
-.sline.dn .nm{color:#bbb}
-.tag{flex:none;width:104px;text-align:center;font-size:13px;font-weight:700;padding:5px 0;border:1px solid #ccc;border-radius:8px;color:#555}
+.done h2{margin:0 0 8px;font-size:1.625rem}
+.done .lines{text-align:left;margin-bottom:10px}
+.done .line{display:flex;justify-content:space-between;min-height:48px}
+.done p{margin:0 0 6px;font-size:1.0625rem;line-height:1.5}
+.sline{display:flex;align-items:center;gap:8px;min-height:64px;border-bottom:1px solid #e3e3e3}
+.sline .nm{flex:1;min-width:0;font-size:1.125rem;overflow-wrap:anywhere}
+.sline.dn .nm{color:#555;font-weight:400}
+.tag{flex:none;width:8rem;text-align:center;font-size:1rem;font-weight:700;padding:6px 0;border:1px solid #888;border-radius:8px;color:#444}
 .tag.soon{border-color:#1d5fb8;color:#1d5fb8}
-.tag.dn{border-color:transparent;color:#bbb;font-weight:400}
+.tag.dn{border-color:transparent;color:#555;font-weight:400}
 </style>
 </head>
 <body>
@@ -101,7 +124,10 @@ b{font-weight:700}
     <span class="t">カフェ</span><span class="seat" id="seat"></span><span class="sp"></span>
     <button id="stat"></button>
   </div>
-  <div class="cats" id="cats"></div>
+  <div class="cbar">
+    <div class="cats" id="cats"></div>
+    <div class="mode"><i>見本用</i><div><button id="m1" class="on">1列</button><button id="m2">2列</button></div></div>
+  </div>
   <div id="list"></div>
   <div class="foot" id="foot">
     <div class="note">お会計は帰りにレジで</div>
@@ -111,8 +137,9 @@ b{font-weight:700}
     </div>
   </div>
   <div class="ov" id="ov" hidden>
-    <div class="win">
-      <div class="whead"><b id="wt"></b><button id="wx" aria-label="閉じる">✕</button></div>
+    <div class="win" id="win">
+      <div class="whead"><b id="wt"></b><button id="wx" aria-label="閉じる">✕ 閉じる</button></div>
+      <div class="hero" id="wh" hidden></div>
       <div class="wbody" id="wb"></div>
       <div class="wfoot" id="wf"></div>
     </div>
@@ -120,14 +147,33 @@ b{font-weight:700}
 </div>
 <script>
 // ---- 仮データ（品名と値段は register.html と同じ）
-const CATS=["Food","Hot Drink","Sweets","Ice Drink","Original Drink"];
-const ITEMS=[
- [0,"ホットサンド",500],[0,"カレーライス",600],[0,"トースト",400],
- [1,"コーヒー HOT",300],[1,"紅茶 HOT",300],[1,"ココア",300],[1,"カフェラテ",300],
- [2,"マフィン",400],[2,"クッキー",300],[2,"プリン",350],
- [3,"コーヒー ICE",300],[3,"紅茶 ICE",300],[3,"オレンジジュース",300],
- [4,"永遠の愛",400],[4,"誰もが憧れるベリーソーダ",300],[4,"自由を求めるクリームソーダ",400],[4,"革命の歌 明日への希望を掲げて",400]
-].map((a,i)=>({id:i,cat:a[0],name:a[1],price:a[2],so:a[1]==="マフィン"}));
+const CATS=["フード","ホットドリンク","スイーツ","アイスドリンク","オリジナルドリンク"];
+const BG=["#fde7c7","#f7ddd0","#fbdfe8","#d9edf8","#e6ddf6"];
+// [分類, 品名, 値段, 絵の種類, 中身の色]  絵の種類 null＝画像なし（本番では設定の表で画像を指定）
+const RAW=[
+ [0,"ホットサンド",500,"sand"],[0,"カレーライス",600,"curry"],[0,"トースト",400,"toast"],
+ [1,"コーヒー HOT",300,"cup","#7a4b2a"],[1,"紅茶 HOT",300,"cup","#b5532a"],[1,"ココア",300,"cup","#5a3a2a"],[1,"カフェラテ",300,"cup","#c9a27a"],
+ [2,"マフィン",400,"muffin"],[2,"クッキー",300,null],[2,"プリン",350,"pudding"],
+ [3,"コーヒー ICE",300,"glass","#7a4b2a"],[3,"紅茶 ICE",300,"glass","#c0662e"],[3,"オレンジジュース",300,"glass","#f5a623"],
+ [4,"永遠の愛",400,"glass","#e0577a"],[4,"誰もが憧れるベリーソーダ",300,"glass","#7b4fc4"],[4,"自由を求めるクリームソーダ",400,"glass","#3fb68b","cream"],[4,"革命の歌 明日への希望を掲げて",400,"glass","#d03a3a"]
+];
+const ITEMS=RAW.map((a,i)=>({id:i,cat:a[0],name:a[1],price:a[2],art:a[3],col:a[4],ext:a[5],so:a[1]==="マフィン"}));
+function art(i){
+  if(!i.art)return '';
+  const W='#fff';let g='';
+  switch(i.art){
+    case 'cup':g=`<path d="M52 18c-4 5 4 8 0 13M64 16c-4 5 4 8 0 13" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/><ellipse cx="60" cy="70" rx="36" ry="7" fill="${W}" opacity=".85"/><path d="M36 36h48v20a24 18 0 0 1-48 0z" fill="${W}"/><path d="M84 42h5a8 8 0 0 1 0 16h-7" fill="none" stroke="${W}" stroke-width="5"/><ellipse cx="60" cy="37" rx="24" ry="5" fill="${i.col}"/>`;break;
+    case 'glass':g=`<path d="M36 16h48l-6 54a7 7 0 0 1-7 6H49a7 7 0 0 1-7-6z" fill="${W}" opacity=".9"/><path d="M39 34h42l-4.5 36a5 5 0 0 1-5 4.5H48.500a5 5 0 0 1-5-4.5z" fill="${i.col}"/>`+
+      (i.ext==='cream'?`<circle cx="60" cy="30" r="12" fill="#fff"/>`:`<rect x="50" y="42" width="11" height="11" rx="2" fill="#fff" opacity=".55"/><rect x="63" y="52" width="11" height="11" rx="2" fill="#fff" opacity=".55"/>`)+
+      `<path d="M66 6l10 30" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`;break;
+    case 'sand':g=`<ellipse cx="60" cy="66" rx="42" ry="9" fill="${W}"/><path d="M28 60L60 22l32 38z" fill="#e0a95b"/><path d="M38 60L60 34l22 26z" fill="#f6dca4"/>`;break;
+    case 'curry':g=`<ellipse cx="60" cy="58" rx="42" ry="16" fill="${W}"/><path d="M30 56c0-14 18-18 30-12s30 0 30 12c0 6-14 10-30 10S30 62 30 56z" fill="#a8641f"/><ellipse cx="46" cy="52" rx="14" ry="9" fill="#fff8e6"/>`;break;
+    case 'toast':g=`<rect x="32" y="18" width="56" height="54" rx="14" fill="#e0a95b"/><rect x="39" y="26" width="42" height="40" rx="9" fill="#f6dca4"/>`;break;
+    case 'muffin':g=`<path d="M32 48a28 24 0 0 1 56 0z" fill="#c98a4b"/><path d="M37 48h46l-6 24H43z" fill="#f2c9d4"/>`;break;
+    case 'pudding':g=`<ellipse cx="60" cy="70" rx="38" ry="7" fill="${W}"/><path d="M38 68l6-30h32l6 30z" fill="#f5d36a"/><path d="M42 40a18 8 0 0 1 36 0 18 6 0 0 1-36 0z" fill="#8b4a1c"/><circle cx="60" cy="28" r="6" fill="#d03a3a"/>`;break;
+  }
+  return `<svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="120" height="90" fill="${BG[i.cat]}"/>${g}</svg>`;
+}
 const SOON_MS=10000, SEND_MS=600, CALL_MS=20000;
 const $=id=>document.getElementById(id);
 const yen=v=>v.toLocaleString('ja-JP')+"円";
@@ -164,18 +210,18 @@ function setCat(i){
 }
 
 // ---- 一覧（一度だけ作り、あとは中身だけ直す）
-function stp(id,v,dis){
+function stp(id,v){
   return `<span class="stp"><button data-a="-" data-id="${id}" aria-label="減らす"${v===0?' disabled':''}>−</button><b class="${v===0?'z':''}">${v}</b><button data-a="+" data-id="${id}" aria-label="増やす">＋</button></span>`;
 }
 function buildList(){
   let h='';
   CATS.forEach((c,ci)=>{
-    h+=`<section data-sec="${ci}"><div class="sh">${c}</div>`;
+    h+=`<section data-sec="${ci}"><div class="sh">${c}</div><div class="items">`;
     ITEMS.filter(i=>i.cat===ci).forEach(i=>{
-      h+=`<div class="row${i.so?' so':''}" data-row="${i.id}"><div class="info"><div class="nm">${esc(i.name)}</div><div class="pr">${yen(i.price)}</div></div>`+
-        (i.so?`<span class="sold">売り切れ</span>`:stp(i.id,0))+`</div>`;
+      h+=`<div class="it${i.so?' so':''}" data-row="${i.id}"><div class="ph">${art(i)}</div><div class="bd"><div class="nm">${esc(i.name)}</div><div class="pr">${yen(i.price)}</div>`+
+        (i.so?`<span class="sold">売り切れ</span>`:stp(i.id,0))+`</div></div>`;
     });
-    h+=`</section>`;
+    h+=`</div></section>`;
   });
   h+=`<div id="spacer"></div>`;
   $('list').innerHTML=h;
@@ -195,11 +241,11 @@ function paintRow(id){
 function paintMain(){
   const t=totals(),m=$('main');
   if(t.n===0){m.disabled=true;m.textContent='メニューを選んでください'}
-  else{m.disabled=false;m.innerHTML=`注文に進む<span>${t.n}点 ${yen(t.s)}</span>`}
+  else{m.disabled=false;m.innerHTML=`<span>注文に進む</span><span>${t.n}点 ${yen(t.s)}</span>`}
 }
 function paintStat(){
   const n=orderedCount(),b=$('stat');
-  b.textContent=n?`注文の状況 ${n}`:'注文の状況';
+  b.textContent=n?`注文・お会計 ${n}`:'注文・お会計';
   b.disabled=n===0;
 }
 function change(id,d){
@@ -212,11 +258,14 @@ $('list').addEventListener('click',e=>{
   const b=e.target.closest('button[data-a]');if(!b||b.disabled)return;
   change(+b.dataset.id,b.dataset.a==='+'?1:-1);
 });
-$('cats').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-c]');if(!b)return;
-  const i=+b.dataset.c,sec=$('list').querySelector(`[data-sec="${i}"]`);
+function goCat(i){
+  const sec=$('list').querySelector(`[data-sec="${i}"]`);
   $('list').scrollTop=sec.offsetTop;
   setCat(i);
+}
+$('cats').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-c]');if(!b)return;
+  goCat(+b.dataset.c);
 });
 $('list').addEventListener('scroll',()=>{
   const y=$('list').scrollTop+8,secs=$('list').querySelectorAll('section');
@@ -225,10 +274,20 @@ $('list').addEventListener('scroll',()=>{
 },{passive:true});
 addEventListener('resize',fixSpacer);
 
+// ---- 見本用：1列／2列
+function setMode(two){
+  $('list').classList.toggle('m2',two);
+  $('m1').classList.toggle('on',!two);$('m2').classList.toggle('on',two);
+  fixSpacer();goCat(activeCat);
+}
+$('m1').onclick=()=>setMode(false);
+$('m2').onclick=()=>setMode(true);
+
 // ---- 窓
 function openWin(kind){
   if(win)return;
   win=kind;
+  $('win').classList.toggle('bill',kind==='status');
   $('ov').hidden=false;
   requestAnimationFrame(()=>requestAnimationFrame(()=>$('ov').classList.add('show')));
 }
@@ -249,10 +308,11 @@ function openConfirm(){
 }
 function paintConfirm(){
   $('wt').textContent='注文の確認';
+  $('wh').hidden=true;
   const body=$('wb'),top=body.scrollTop,t=totals();
   body.innerHTML=snap.map(id=>{
     const i=item(id),v=q[id];
-    return `<div class="line${v===0?' z':''}"><span class="nm">${esc(i.name)}</span>${stp(id,v)}<span class="amt">${yen(v*i.price)}</span></div>`;
+    return `<div class="line${v===0?' z':''}"><span class="nm">${esc(i.name)}</span><span class="amt">${yen(v*i.price)}</span>${stp(id,v)}</div>`;
   }).join('');
   body.scrollTop=top;
   $('wf').innerHTML=`<div class="total"><span>合計</span><b class="amt">${yen(t.s)}</b></div><button class="big" id="go"${t.n===0?' disabled':''}>注文する</button>`;
@@ -276,11 +336,12 @@ function send(){
 }
 function paintDone(){
   $('wt').textContent='注文の確認';
+  $('wh').hidden=true;
   $('wb').innerHTML=`<div class="done"><div class="chk">✓</div><h2>注文しました</h2><div class="lines">`+
     doneLines.map(l=>`<div class="line"><span class="nm">${esc(item(l.id).name)}</span><span class="amt">×${l.qty}</span></div>`).join('')+
-    `</div><p>お席でお待ちください。お会計は帰りにレジで</p></div>`;
+    `</div><p>お席でお待ちください。お会計は帰りにレジで</p><p>追加のご注文も、この画面からできます</p></div>`;
   $('wb').scrollTop=0;
-  $('wf').innerHTML=`<button class="big" id="cls">閉じる</button>`;
+  $('wf').innerHTML=`<button class="big" id="cls">メニューに戻る</button>`;
   $('cls').onclick=closeWin;
 }
 function openStatus(){
@@ -289,14 +350,16 @@ function openStatus(){
 }
 const TAG={making:['作っています',''],soon:['まもなくお届け','soon'],done:['お届け済み','dn']};
 function paintStatus(){
-  $('wt').textContent='注文の状況';
+  $('wt').textContent='注文・お会計';
+  const hero=$('wh');hero.hidden=false;
+  hero.innerHTML=`<div class="seatbig"><small>席</small><span>${esc(seat)}</span></div><div class="totbig"><small>合計</small><b>${yen(orderedSum())}</b></div><p>お帰りのとき、レジでお見せください</p>`;
   const body=$('wb'),top=body.scrollTop;
   body.innerHTML=orders.map(o=>{
     const t=TAG[o.status];
     return `<div class="sline${o.status==='done'?' dn':''}"><span class="nm">${esc(item(o.id).name)} ×${o.qty}</span><span class="tag ${t[1]}">${t[0]}</span></div>`;
   }).join('');
   body.scrollTop=top;
-  $('wf').innerHTML=`<div class="total"><span>合計</span><b class="amt">${yen(orderedSum())}</b></div><div class="note">お会計は帰りにレジで</div><div class="note">変更は店員へ</div>`;
+  $('wf').innerHTML=`<div class="note">変更は店員へ</div>`;
 }
 $('main').onclick=openConfirm;
 $('stat').onclick=openStatus;
