@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>レジ（見本・前の版）</title>
+<style>
+:root{--ink:#1d1d1f;--sub:#6b6b70;--line:#c9c9cf;--bg:#f2f2f4;--unpaid:#ffd98a;--unpaid-line:#d99a00;--sel:#1a56db;--selbg:#dbe7ff;--ok:#157347}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;color:var(--ink);background:var(--bg);overflow:hidden;display:flex;flex-direction:column;height:100dvh;font-size:15px}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:8px}
+button:disabled{cursor:default}
+.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+/* 上の帯 */
+header{flex:none;height:56px;display:flex;align-items:center;gap:16px;padding:0 14px;background:#222;color:#fff}
+header h1{font-size:20px;margin:0;white-space:nowrap}
+header .round{font-size:16px;color:#ddd}
+header .sum{margin-left:8px;font-size:16px}
+header .sum b{font-size:20px}
+header .sp{flex:1}
+#btnReset{height:40px;padding:0 16px;background:#fff;color:#222;font-weight:700}
+main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
+/* 左：マップ */
+.mapwrap{display:flex;flex-direction:column;min-height:0;min-width:0;padding:10px 10px 6px}
+#map{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(40px,1fr);gap:4px;overflow:auto}
+.edge{flex:none;display:flex;justify-content:space-between;font-size:11px;color:var(--sub);height:16px;line-height:16px}
+.edge b{font-weight:700;color:#444}
+.edge span{width:40px;text-align:right}.edge span:first-child{text-align:left}
+.kitchen{display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:8px;color:#9a9aa0;font-size:14px;background:#f8f8f9}
+.table{grid-column:var(--c);grid-row:var(--r);display:flex;flex-direction:row;gap:4px;padding:3px;border:1px solid var(--line);border-radius:10px;background:#e4e4e8;min-height:0}
+.thead{flex:none;width:22px;padding:0;font-weight:400;font-size:12px;color:var(--sub);background:#f4f4f6}
+.thead.none{color:#bbb;background:transparent;border-color:transparent}
+.thead.all{background:var(--sel);color:#fff;border-color:var(--sel)}
+.seats{flex:1;min-width:0;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}
+.seat{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;padding:0;border-radius:6px;min-height:0;min-width:0}
+.seat .n{font-size:20px;font-weight:700}
+.seat .a{font-size:11px;font-variant-numeric:tabular-nums}
+.seat.empty{background:#fff;color:#444}
+.seat.seated{background:#d9d9dc;color:#555;border-color:#d9d9dc}
+.seat.unpaid{background:var(--unpaid);border-color:var(--unpaid-line);font-weight:700}
+.seat.unpaid.on{background:var(--selbg);border:4px solid var(--sel);color:var(--sel)}
+.seat.busy{background:repeating-linear-gradient(45deg,#fff,#fff 5px,#c4c4c8 5px,#c4c4c8 8px);color:#333}
+.legend{flex:none;display:flex;gap:12px;align-items:center;font-size:12px;color:var(--sub);padding-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid var(--line);vertical-align:-2px;margin-right:3px}
+.legend .sp{flex:1}
+#btnInit{font-size:12px;padding:3px 8px;color:var(--sub)}
+/* 右：会計 */
+.pay{display:flex;flex-direction:column;min-height:0;min-width:0;background:#fff;border-left:1px solid var(--line)}
+#notice{flex:none}
+.done{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#e5f4ea;color:var(--ok);font-weight:700;border-bottom:1px solid #b9dfc6}
+.done span{flex:1}
+.done button{height:38px;padding:0 12px;background:#fff}
+#paybody{flex:1;min-height:0;overflow:auto;padding:10px 12px}
+.hint{font-size:18px;font-weight:700;margin:2px 0 10px}
+.row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.row .nm{flex:1;min-width:0}
+.list button.item{display:flex;width:100%;justify-content:space-between;padding:10px 12px;margin-bottom:6px;font-size:17px}
+.card{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;padding:6px 10px}
+.card h3{display:flex;align-items:center;gap:8px;margin:2px 0 4px;font-size:17px}
+.card h3 .hn{flex:1}
+.flag{height:28px;padding:0 8px;font-size:12px;color:var(--sub);background:#fff;white-space:nowrap}
+.flag.on{background:#fdecea;color:#b3261e;border-color:#b3261e;font-weight:700}
+.fl{position:absolute;top:0;right:3px;font-size:11px;font-style:normal;color:#b3261e;line-height:1.2}
+#btnFlags{height:34px;padding:0 10px;background:transparent;color:#fff;border-color:#777;font-size:14px;white-space:nowrap}
+#btnFlags.zero{opacity:.45}
+.fcard{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;padding:6px 10px;font-size:14px}
+.fcard .t{display:flex;gap:8px;align-items:baseline}.fcard .t b{flex:1;font-size:16px}.fcard .t span.s{color:var(--sub);font-size:12px}
+.fcard .tag{font-size:12px;color:var(--ok);font-weight:700}
+.note{font-size:11px;color:var(--sub);margin:6px 0}
+.flags>button{width:100%;height:48px;font-size:16px;font-weight:700;margin-bottom:8px}
+.line{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid #ececef;font-size:14px;min-height:36px}
+.line .nm{flex:1;min-width:0}
+.line .amt{width:64px}
+.line button{height:30px;padding:0 8px;font-size:13px;color:var(--sub)}
+.line .yes{background:#b3261e;color:#fff;border-color:#b3261e}
+.confirm h2{font-size:18px;margin:2px 0 8px}
+.confirm button{display:block;width:100%;height:54px;font-size:17px;font-weight:700;margin-bottom:8px}
+.confirm .danger{background:#b3261e;color:#fff;border-color:#b3261e}
+.confirm .row{border-bottom:1px solid #ececef;font-size:15px}
+.foot{flex:none;padding:8px 12px 12px;border-top:1px solid var(--line);background:#fafafb}
+.total{display:flex;justify-content:space-between;align-items:baseline;font-size:16px}
+.total b{font-size:34px;font-variant-numeric:tabular-nums}
+.foot .sub{display:flex;justify-content:flex-end;margin:2px 0 6px}
+#btnClear{height:32px;padding:0 12px;font-size:13px}
+#btnPay{width:100%;height:68px;font-size:24px;font-weight:700;background:var(--ok);color:#fff;border-color:var(--ok)}
+#btnClear:disabled{opacity:.4}
+#btnPay:disabled{background:#d6d6da;color:#8a8a90;border-color:#d6d6da}
+/* スマホ */
+@media (max-width:700px){
+  body{font-size:14px}
+  header{height:48px;gap:6px;padding:0 8px}
+  header h1{font-size:15px}header .round{display:none}header .sum{white-space:nowrap}
+  #btnFlags{height:30px;padding:0 6px;font-size:12px}.lg{display:none}
+  header .sum{font-size:12px;margin:0}header .sum b{font-size:14px}
+  #btnReset{height:34px;padding:0 8px;font-size:12px;white-space:nowrap}
+  main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 42%}
+  .mapwrap{padding:6px}
+  #map{grid-auto-rows:76px}
+  .table{flex-direction:column;gap:2px;padding:2px}
+  .thead{width:auto;height:18px;font-size:11px;line-height:1}
+  .seats{gap:2px}
+  .seat .n{font-size:16px}.seat .a{font-size:10px}
+  .pay{border-left:0;border-top:1px solid var(--line)}
+  .hint{font-size:15px;margin-bottom:6px}
+  .total b{font-size:26px}
+  #btnPay{height:56px;font-size:20px}
+  .legend{gap:8px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>レジ（見本・前の版）</h1><span class="round">14:00の回</span>
+  <span class="sum" id="topSum"></span>
+  <button id="btnFlags" data-a="flags"></button>
+  <span class="sp"></span>
+  <button id="btnReset" data-a="resetAsk">全席を空に戻す</button>
+</header>
+<main>
+  <section class="mapwrap">
+    <div class="edge"><span></span><b>前（ショー）</b><span>ドア</span></div>
+    <div id="map"></div>
+    <div class="edge"><span></span><span></span><span>ドア</span></div>
+    <div class="legend">
+      <span>[全]=机ごと選ぶ</span>
+      <span><i style="background:#fff"></i>空き</span>
+      <span><i style="background:#d9d9dc"></i>注文なし</span>
+      <span><i style="background:var(--unpaid)"></i>未会計</span>
+      <span><i style="background:repeating-linear-gradient(45deg,#fff,#fff 3px,#bbb 3px,#bbb 5px)"></i>🔒会計中(他のレジ)</span>
+      <span class="sp"></span>
+      <button id="btnInit" data-a="init">最初に戻す</button>
+    </div>
+  </section>
+  <section class="pay">
+    <div id="notice"></div>
+    <div id="paybody"></div>
+    <div class="foot">
+      <div class="total"><span>合計</span><b id="total">0円</b></div>
+      <div class="sub"><button id="btnClear" data-a="clear">× 選択をやめる</button></div>
+      <button id="btnPay" data-a="pay">✓ 会計済みにする</button>
+    </div>
+  </section>
+</main>
+<script>
+// ---- 部屋の配置（見本用）。本番では設定の表から読む想定。
+// tables: [列, 行, 席数]  列・行・席数はこの配列だけで変わる（机の名前は持たない）
+// blocks: [表示名, 列, 行, 行数]  席でない場所（押せない）
+const ROOM = {
+  tables: [
+    [1,1,3],[2,1,3],[3,1,3],  [1,2,3],[2,2,3],[3,2,3],  [1,3,3],[2,3,3],[3,3,3],
+    [1,4,3],[2,4,3],[3,4,3],  [1,5,3],[2,5,3],[3,5,3],
+    [2,6,3],[3,6,3],  [2,7,3],[3,7,3],  [2,8,3],[3,8,3],
+    [2,9,3],[3,9,3],  [2,10,3],[3,10,3],  [2,11,3],[3,11,3],  [2,12,3],[3,12,3],
+  ],
+  blocks: [["キッチン",1,8,5]],
+};
+// 席番号の振り方（設定で変えられる想定）: 前の行から後ろへ、同じ行は左の机から右へ、机の中は左の席から右へ。
+function numberSeats(tables){
+  let k = 0;
+  return tables.map((t,i)=>({i, c:t[0], r:t[1], n:t[2]}))
+    .sort((a,b)=>a.r-b.r || a.c-b.c)
+    .map(t=>({...t, seats: Array.from({length:t.n},()=>String(++k))}))
+    .sort((a,b)=>a.i-b.i);
+}
+const TB = numberSeats(ROOM.tables);                 // 机ごとの {列,行,席の配列}
+const SEATS = TB.flatMap(t=>t.seats).sort((a,b)=>a-b);   // 席番号（文字列）の昇順
+const ORD = Object.fromEntries(SEATS.map((n,i)=>[n,i]));
+const MENU = [["永遠の愛",400],["誰もが憧れるベリーソーダ",300],["自由を求めるクリームソーダ",400],["革命の歌 明日への希望を掲げて",400],
+  ["コーヒー HOT",300],["コーヒー ICE",300],["紅茶 HOT",300],["紅茶 ICE",300],["ココア",300],["カフェラテ",300],
+  ["オレンジジュース",300],["ホットサンド",500],["カレーライス",600],["マフィン",400],["クッキー",300]];
+
+// ---- 作り物のデータ（固定の種）
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let S, selected, lastPaid, confirmRow, resetMode, flags, flagMode;
+function init(){
+  const r = rng(20241121), pick = n => Math.floor(r()*n);
+  S = {}; selected = new Set(); lastPaid = null; confirmRow = null; resetMode = false; flags = []; flagMode = false;
+  const order = ROOM.tables.map((_,i)=>i).sort(()=>r()-.5);
+  const pOf = {}; order.forEach((ti,k)=>{ pOf[ti] = k<14 ? .95 : k<20 ? .55 : .05; });
+  TB.forEach((t,ti)=>{
+    const fav = [pick(15), pick(15)];            // 同じ卓は似た注文
+    t.seats.forEach(n=>{
+      const x = r(); let st = 'empty', lines = [];
+      if (x < pOf[ti]) {
+        st = 'unpaid';
+        const k = 1 + pick(3);
+        for (let i=0;i<k;i++){
+          const m = r()<.6 ? fav[pick(2)] : pick(15);
+          const f = lines.find(l=>l.m===m);
+          if (f) f.q++; else lines.push({m, q: r()<.15 ? 2 : 1});
+        }
+      } else if (r() < (pOf[ti] >= .5 ? .5 : .1)) st = 'seated';
+      S[n] = {st, lines};
+    });
+  });
+  // 会計中（もう1台のレジ）: 同じ卓の2席
+  const bt = TB[order[0]].seats;
+  [bt[0], bt[1]].forEach(n=>{ if (!S[n].lines.length) S[n].lines=[{m:pick(15),q:1}]; S[n].st='busy'; });
+  render();
+}
+const yen = v => v.toLocaleString('ja-JP');
+const sub = n => S[n].lines.reduce((s,l)=>s+MENU[l.m][1]*l.q,0);
+const flagOf = n => flags.find(f=>f.seat===n&&!f.paid);
+const linesOf = f => S[f.seat].st==='unpaid' ? S[f.seat].lines : f.lines;
+const unpaidSeats = () => SEATS.filter(n=>S[n].st==='unpaid');
+
+// ---- 描画
+function render(){
+  const u = unpaidSeats();
+  const bf=document.getElementById('btnFlags'); bf.className=flags.length?'':'zero';
+  bf.innerHTML=`⚑ <span class="lg">印 </span>${flags.length}<span class="lg">件</span>`;
+  document.getElementById('topSum').innerHTML = `<span class="lg">未会計 </span><b>${u.length}</b>席 <b>${yen(u.reduce((s,n)=>s+sub(n),0))}</b>円`;
+  // マップ
+  document.getElementById('map').innerHTML = ROOM.blocks.map(([nm,c,r,sp])=>`<div class="kitchen" style="grid-column:${c};grid-row:${r} / span ${sp}">${nm}</div>`).join('') + TB.map(({i:ti,c,r,seats})=>{
+    const un = seats.filter(n=>S[n].st==='unpaid');
+    const all = un.length && un.every(n=>selected.has(n));
+    const hc = !un.length ? 'none' : all ? 'all' : '';
+    return `<div class="table" style="--c:${c};--r:${r}">
+      <button class="thead ${hc}" data-a="table" data-v="${ti}" title="この机をまとめて選ぶ" ${un.length?'':'disabled'}>${all?'✓':'全'}</button>
+      <div class="seats">${seats.map(n=>{
+        const s=S[n], on=selected.has(n);
+        const inner = `<span class="n">${n}</span>` + (s.st==='unpaid'&&flagOf(n)?'<i class="fl">⚑</i>':'') + (s.st==='unpaid'?`<span class="a">${yen(sub(n))}</span>`:s.st==='busy'?`<span class="a">🔒</span>`:'');
+        return `<button class="seat ${s.st} ${on?'on':''}" data-a="seat" data-v="${n}" ${s.st==='unpaid'?'':'disabled'}>${inner}</button>`;
+      }).join('')}</div></div>`;
+  }).join('');
+  // お知らせ（会計しました）
+  document.getElementById('notice').innerHTML = lastPaid
+    ? `<div class="done"><span>✓ 会計しました　席${lastPaid.seats.map(x=>x.n).join('・')}　${yen(lastPaid.total)}円${lastPaid.flagN?`　⚑ 印 ${lastPaid.flagN}件`:''}</span><button data-a="undo">取り消す</button></div>` : '';
+  // 会計の欄
+  const sel = [...selected].sort((a,b)=>ORD[a]-ORD[b]);
+  const total = sel.reduce((s,n)=>s+sub(n),0);
+  let h = '';
+  if (resetMode) {
+    h = `<div class="confirm">` + (u.length
+      ? `<h2>未会計の席が${u.length}つあります</h2>
+         <button data-a="resetKeep">未会計の席は残して、ほかを空に戻す</button>
+         <button class="danger" data-a="resetAll">全部を空に戻す</button>
+         <button data-a="resetNo">やめる</button>
+         ${u.map(n=>`<div class="row"><span class="nm">席 ${n}</span><span class="num">${yen(sub(n))}円</span></div>`).join('')}`
+      : `<h2>全席を空に戻しますか</h2>
+         <button class="danger" data-a="resetAll">全席を空に戻す</button>
+         <button data-a="resetNo">やめる</button>`) + `</div>`;
+  } else if (flagMode) {
+    h = `<div class="flags"><button data-a="flagsClose">閉じる</button>` + (flags.length ? flags.map(f=>{
+      const L=linesOf(f), tot=L.reduce((x,l)=>x+MENU[l.m][1]*l.q,0);
+      const st=f.paid?'会計済み':S[f.seat].st==='unpaid'?'未会計':'空に戻した';
+      return `<div class="fcard"><div class="t"><b>席 ${f.seat}</b><span class="s">${f.time}</span><span class="tag">${st}</span></div>
+        <div class="row"><span class="nm">${L.length?L.map(l=>MENU[l.m][0]+'×'+l.q).join('、'):'注文なし'}</span><span class="num">${yen(tot)}円</span></div></div>`;
+    }).join('') : '<div class="hint">印はありません</div>') + `<div class="note">本番では閉店後に表で見返す想定</div></div>`;
+  } else if (!sel.length) {
+    h = `<div class="hint">席を押してください</div><div class="list">` +
+      u.map(n=>`<button class="item" data-a="seat" data-v="${n}"><span>席 ${n}</span><span class="num">${yen(sub(n))}円</span></button>`).join('') + `</div>`;
+  } else {
+    h = sel.map(n=>`<div class="card"><h3><span class="hn">席 ${n}</span><button class="flag ${flagOf(n)?'on':''}" data-a="flag" data-v="${n}">⚑ ${flagOf(n)?'印あり':'印'}</button><span class="num">${yen(sub(n))}円</span></h3>` +
+      S[n].lines.map((l,i)=>{
+        const key = n+':'+i, amt = MENU[l.m][1]*l.q;
+        const tail = confirmRow===key
+          ? `<button class="yes" data-a="cancel" data-v="${key}">取り消す</button><button data-a="nocancel">やめる</button>`
+          : `<span class="amt num">${yen(amt)}</span><button data-a="askcancel" data-v="${key}">取消</button>`;
+        return `<div class="line"><span class="nm">${MENU[l.m][0]} ×${l.q}</span>${tail}</div>`;
+      }).join('') + `</div>`).join('');
+  }
+  document.getElementById('paybody').innerHTML = h;
+  document.getElementById('total').textContent = yen(resetMode||flagMode?0:total) + '円';
+  document.getElementById('btnPay').disabled = resetMode || flagMode || !sel.length;
+  document.getElementById('btnClear').disabled = resetMode || flagMode || !sel.length;
+}
+
+// ---- 操作
+const A = {
+  seat(v){ if(S[v].st!=='unpaid')return; resetMode=false; flagMode=false; confirmRow=null; selected.has(v)?selected.delete(v):selected.add(v); },
+  table(v){ resetMode=false; flagMode=false; confirmRow=null;
+    const t=TB[v].seats.filter(n=>S[n].st==='unpaid');
+    const all=t.length&&t.every(n=>selected.has(n)); t.forEach(n=>all?selected.delete(n):selected.add(n)); },
+  clear(){ selected.clear(); confirmRow=null; },
+  pay(){
+    const sel=[...selected].sort((a,b)=>ORD[a]-ORD[b]); if(!sel.length)return;
+    let flagN=0; flags.forEach(f=>{ if(!f.paid&&sel.includes(f.seat)){ f.lines=S[f.seat].lines.map(l=>({...l})); f.paid=true; flagN++; } });
+    lastPaid={flagN,seats:sel.map(n=>({n,lines:S[n].lines.map(l=>({...l}))})),total:sel.reduce((s,n)=>s+sub(n),0)};
+    sel.forEach(n=>{S[n]={st:'empty',lines:[]};}); selected.clear(); confirmRow=null;
+  },
+  undo(){ const ids=lastPaid.seats.map(x=>x.n); flags.forEach(f=>{ if(f.paid&&ids.includes(f.seat)) f.paid=false; });
+    lastPaid.seats.forEach(x=>{S[x.n]={st:'unpaid',lines:x.lines};}); lastPaid=null; },
+  askcancel(v){ confirmRow=v; },
+  nocancel(){ confirmRow=null; },
+  cancel(v){ const [n,ii]=v.split(':'), i=+ii; S[n].lines.splice(i,1); confirmRow=null;
+    if(!S[n].lines.length){ S[n].st='seated'; selected.delete(n); } },
+  flag(v){ const f=flagOf(v); if(f) flags.splice(flags.indexOf(f),1); else flags.push({seat:v,time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),paid:false,lines:[]}); },
+  flags(){ flagMode=true; resetMode=false; confirmRow=null; },
+  flagsClose(){ flagMode=false; },
+  resetAsk(){ resetMode=true; flagMode=false; confirmRow=null; },
+  resetNo(){ resetMode=false; },
+  resetKeep(){ SEATS.forEach(n=>{ if(S[n].st==='seated'||S[n].st==='empty') S[n]={st:'empty',lines:[]}; }); resetMode=false; lastPaid=null; },
+  resetAll(){ flags.forEach(f=>{ if(!f.paid) f.lines=S[f.seat].lines.map(l=>({...l})); });
+    SEATS.forEach(n=>{S[n]={st:'empty',lines:[]};}); selected.clear(); resetMode=false; lastPaid=null; },
+  init(){ init(); },
+};
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]'); if(!b||b.disabled)return;
+  A[b.dataset.a](b.dataset.v); if(b.dataset.a!=='init')render();
+});
+init();
+</script>
+</body>
+</html>
