@@ -36,7 +36,6 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
 .row{min-height:76px;padding-top:6px;padding-bottom:6px;border-bottom:1px solid #eee;background:#fff;transition:opacity .2s}
 .row.sep{border-top:2px solid #bbb}
 .row .nm{min-width:0;font-size:20px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
-.row .nm .q{font-size:18px;margin-left:4px;white-space:nowrap}
 .seat{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
 .seat small{font-size:12px;color:#555;margin-right:2px}
 .seat b{font-size:22px;font-weight:700}
@@ -62,16 +61,16 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
 .ln{display:grid;grid-template-columns:minmax(0,1fr) 60px 60px;column-gap:4px;align-items:center;min-height:68px;padding:4px 8px 4px 6px;border-left:4px solid transparent;border-bottom:1px solid #eee;background:#fff;transition:opacity .2s}
 .ln:last-child{border-bottom:0}
 .ln .nm{min-width:0;font-size:18px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
-.ln .nm .q{margin-left:4px;white-space:nowrap}
 .ln .ck{width:60px;height:60px}
 .ln.fade{opacity:.35}
 
 /* 数の直し・済んだ物 */
 .nm{cursor:pointer}
 .nm .cv{font-size:13px;font-weight:400;color:#aaa;margin-left:8px;white-space:nowrap}
-.qe{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:6px 0 2px}
-.qe .qb{width:56px;height:56px;padding:0;font-size:28px;font-weight:700}
-.qe .qn{font-size:22px;font-weight:700;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.qe{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-start;gap:12px;padding:6px 0 2px}
+.qe .qb{height:56px;padding:0 18px;font-size:16px;font-weight:700}
+.qe .cx{color:#d32f2f;border-color:#d32f2f}
+.zero .nm .t{text-decoration:line-through}
 .zero .nm{opacity:.35}
 .ck:disabled{opacity:.35;cursor:default}
 .r1 .dn{margin-left:auto;min-height:40px;font-weight:700}
@@ -87,7 +86,6 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
 .wr .wm .seat small{display:inline;font-size:11px}
 .wr .wm .seat b{font-size:18px}
 .wr .nm{min-width:0;font-size:18px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
-.wr .nm .q{margin-left:4px;white-space:nowrap}
 .wr .ck{width:60px;height:60px}
 .wr.fade{opacity:.35}
 @media(max-width:600px){#modal{padding:10px}}
@@ -175,13 +173,13 @@ function ckBtn(l,k){
 }
 function nameHtml(l,c){
   const o=ui.open&&ui.open.ctx===c&&ui.open.id===l.id;
-  return `${l.item}${l.qty!==1?`<span class="q">×${l.qty}</span>`:''}<span class="cv">${o?'⌃':'⌄'}</span>`;}
+  return `<span class="t">${l.item}</span><span class="cv">${o?'⌃':'⌄'}</span>`;}
 function mkNm(l,c){const e=mk('div','nm',nameHtml(l,c));e.dataset.l=l.id;return e;}
 function mkQe(l){
-  const e=mk('div','qe',`<button class="qb" data-d="-1" aria-label="減らす">−</button><b class="qn">${l.qty}</b><button class="qb" data-d="1" aria-label="増やす">＋</button>`);
+  const e=mk('div','qe',`<button class="qb cx" data-act="cancel">取り消す</button><button class="qb" data-act="add">1つ足す</button>`);
   e.hidden=true;e.dataset.l=l.id;return e;}
 function renderName(l){
-  for(const c of ['a','b','w']){l['nm'+c].innerHTML=nameHtml(l,c);l['qe'+c].querySelector('.qn').textContent=l.qty;}
+  for(const c of ['a','b','w']){l['nm'+c].innerHTML=nameHtml(l,c);l['qe'+c].querySelector('.cx').textContent=l.cancelled?'戻す':'取り消す';}
 }
 function applyOpen(){
   lines.forEach(l=>{for(const c of ['a','b','w']){
@@ -194,36 +192,38 @@ function addTicket(seat,at,items,isNew){
   tickets.push(t);
   t.el=mk('div','tk');t.el.dataset.t=t.id;
   t.hdr=mk('div','th',`<small>席</small><b>${seat}</b>`);t.el.appendChild(t.hdr);
-  items.forEach(([item,qty,made,doneMin])=>{
-    const dn=doneMin!=null;
-    const l={id:lid++,t,item,qty,cat:CAT[item],made:!!made||dn,carried:dn,gone:dn,timer:null,prev:null,doneAt:dn?T0-doneMin*60000:0,linger:false,lt:null};
-    t.lines.push(l);lines.push(l);
-    // 案A の行
-    const r=mk('div','g row');r.dataset.l=l.id;r.dataset.at=at;r.dataset.item=item;
-    l.nma=mkNm(l,'a');r.appendChild(l.nma);
-    l.bA=ckBtn(l,'made');r.appendChild(l.bA);
-    r.appendChild(mk('div','seat',`<small>席</small><b>${seat}</b>`));
-    l.cA=ckBtn(l,'carried');r.appendChild(l.cA);
-    l.qea=mkQe(l);r.appendChild(l.qea);
-    l.rowA=r;
-    // 案B の行
-    const n=mk('div','ln');n.dataset.l=l.id;
-    l.nmb=mkNm(l,'b');n.appendChild(l.nmb);
-    l.bB=ckBtn(l,'made');n.appendChild(l.bB);
-    l.cB=ckBtn(l,'carried');n.appendChild(l.cB);
-    l.qeb=mkQe(l);n.appendChild(l.qeb);
-    l.rowB=n;t.el.appendChild(n);
-    const w=mk('div','wr');w.dataset.l=l.id;
-    w.appendChild(mk('div','wm',`<small></small><span class="seat"><small>席</small><b>${seat}</b></span>`));
-    l.nmw=mkNm(l,'w');w.appendChild(l.nmw);
-    l.bW=ckBtn(l,'made');w.appendChild(l.bW);l.cW=ckBtn(l,'carried');w.appendChild(l.cW);
-    l.qew=mkQe(l);w.appendChild(l.qew);l.rowW=w;
-    if(isNew){markNew(l);}
-    patchLine(l);
-  });
+  items.forEach(([item,qty,made,doneMin])=>{for(let i=0;i<qty;i++)addLine(t,item,made,doneMin,isNew,null);});
   t.gone=t.lines.length>0&&t.lines.every(l=>l.gone);
   patchTicket(t);
   return t;
+}
+function addLine(t,item,made,doneMin,isNew,afterL){
+  const seat=t.seat,at=t.at,dn=doneMin!=null;
+  const l={id:lid++,t,item,cat:CAT[item],made:!!made||dn,carried:dn,gone:dn,cancelled:false,timer:null,prev:null,doneAt:dn?T0-doneMin*60000:0,linger:false,lt:null};
+  if(afterL)t.lines.splice(t.lines.indexOf(afterL)+1,0,l);else t.lines.push(l);
+  lines.push(l);
+  const r=mk('div','g row');r.dataset.l=l.id;r.dataset.at=at;r.dataset.item=item;
+  l.nma=mkNm(l,'a');r.appendChild(l.nma);
+  l.bA=ckBtn(l,'made');r.appendChild(l.bA);
+  r.appendChild(mk('div','seat',`<small>席</small><b>${seat}</b>`));
+  l.cA=ckBtn(l,'carried');r.appendChild(l.cA);
+  l.qea=mkQe(l);r.appendChild(l.qea);
+  l.rowA=r;
+  const n=mk('div','ln');n.dataset.l=l.id;
+  l.nmb=mkNm(l,'b');n.appendChild(l.nmb);
+  l.bB=ckBtn(l,'made');n.appendChild(l.bB);
+  l.cB=ckBtn(l,'carried');n.appendChild(l.cB);
+  l.qeb=mkQe(l);n.appendChild(l.qeb);
+  l.rowB=n;
+  t.el.insertBefore(n,afterL?afterL.rowB.nextSibling:null);
+  const w=mk('div','wr');w.dataset.l=l.id;
+  w.appendChild(mk('div','wm',`<small></small><span class="seat"><small>席</small><b>${seat}</b></span>`));
+  l.nmw=mkNm(l,'w');w.appendChild(l.nmw);
+  l.bW=ckBtn(l,'made');w.appendChild(l.bW);l.cW=ckBtn(l,'carried');w.appendChild(l.cW);
+  l.qew=mkQe(l);w.appendChild(l.qew);l.rowW=w;
+  if(isNew)markNew(l);
+  patchLine(l);
+  return l;
 }
 function markNew(l){
   l.rowA.classList.add('new');l.rowB.classList.add('new');
@@ -236,7 +236,7 @@ function patchLine(l){
   const done=isDone(l), mkd=l.made&&!l.carried, lg=!done&&waitLong(l.t);
   for(const [r,a,b] of [[l.rowA,l.bA,l.cA],[l.rowB,l.bB,l.cB],[l.rowW,l.bW,l.cW]]){
     r.classList.toggle('fade',r===l.rowW?!done:done);
-    r.classList.toggle('zero',l.qty===0);a.disabled=b.disabled=l.qty===0;
+    r.classList.toggle('zero',l.cancelled);a.disabled=b.disabled=l.cancelled;
     r.classList.toggle('mk',mkd);
     r.classList.toggle('long',lg&&r===l.rowA);
     a.classList.toggle('on',l.made);a.setAttribute('aria-pressed',l.made);
@@ -255,14 +255,15 @@ function setChildren(parent,els,skip){
   els.forEach((el,i)=>{const cur=parent.children[base+i];if(cur!==el)parent.insertBefore(el,cur||null);});
   while(parent.children.length>base+els.length)parent.removeChild(parent.lastChild);
 }
+const cmpT=(x,y)=>x.t.at-y.t.at||x.t.id-y.t.id||x.t.lines.indexOf(x)-y.t.lines.indexOf(y);
 const match=l=>ui.cat<0||l.cat===ui.cat;
 function reflow(){
   // A
   const vis=lines.filter(l=>!l.gone&&match(l));
   if(ui.sort==='i'){
     const first={};vis.forEach(l=>{const a=l.t.at;if(!(l.item in first)||a<first[l.item])first[l.item]=a;});
-    vis.sort((x,y)=>first[x.item]-first[y.item]||(x.item<y.item?-1:x.item>y.item?1:0)||x.t.at-y.t.at||x.id-y.id);
-  }else vis.sort((x,y)=>x.t.at-y.t.at||x.id-y.id);
+    vis.sort((x,y)=>first[x.item]-first[y.item]||(x.item<y.item?-1:x.item>y.item?1:0)||cmpT(x,y));
+  }else vis.sort(cmpT);
   setChildren(listA,vis.map(l=>l.rowA),1);
   vis.forEach((l,i)=>l.rowA.classList.toggle('sep',ui.sort==='i'&&i>0&&vis[i-1].item!==l.item));
   // B
@@ -306,7 +307,7 @@ function showToast(msg,l){
 function hideToast(){toast=null;$('#toast').hidden=true;}
 $('#undo').onclick=()=>{
   if(!toast)return;const l=toast;hideToast();
-  if(l.prev&&l.qty>0){l.made=l.prev.made;l.carried=l.prev.carried;}
+  if(l.prev&&!l.cancelled){l.made=l.prev.made;l.carried=l.prev.carried;}
   l.gone=false;l.t.gone=false;after(l);reflow();
 };
 
@@ -316,21 +317,21 @@ function lineOf(el){return lines.find(l=>l.id==el.dataset.l);}
 function lingerW(l){l.linger=true;clearTimeout(l.lt);l.lt=setTimeout(()=>{l.linger=false;renderWin();},FADE);}
 function onClick(e,c){
   const b=e.target.closest('.ck');
-  if(b){const l=lineOf(b);if(l.qty===0)return;press(l,b.dataset.k);if(c==='w'&&!isDone(l)){lingerW(l);renderWin();}return;}
+  if(b){const l=lineOf(b);if(l.cancelled)return;press(l,b.dataset.k);if(c==='w'&&!isDone(l)){lingerW(l);renderWin();}return;}
   const q=e.target.closest('.qb');
-  if(q){const l=lineOf(q.parentNode);changeQty(l,+q.dataset.d,c);return;}
+  if(q){const l=lineOf(q.parentNode);if(q.dataset.act==='cancel')toggleCancel(l,c);else addUnit(l,c);return;}
   const n=e.target.closest('.nm');
   if(n){const l=lineOf(n);ui.open=(ui.open&&ui.open.ctx===c&&ui.open.id===l.id)?null:{ctx:c,id:l.id};applyOpen();}
 }
-function changeQty(l,d,c){
-  const nq=Math.max(0,Math.min(99,l.qty+d));if(nq===l.qty)return;
-  l.qty=nq;
-  if(nq===0&&(l.made||l.carried||l.gone)){
-    l.made=l.carried=false;after(l);
-    if(c==='w')lingerW(l);
-  }
-  renderName(l);patchLine(l);patchTicket(l.t);
-  if(c==='w')renderWin();
+function toggleCancel(l,c){
+  l.cancelled=!l.cancelled;
+  if(l.cancelled){l.made=l.carried=false;}
+  after(l);renderName(l);patchLine(l);patchTicket(l.t);
+  if(c==='w'){if(l.cancelled)lingerW(l);renderWin();}
+}
+function addUnit(l,c){
+  const n=addLine(l.t,l.item,false,null,true,l);
+  reflow();after(n);applyOpen();
 }
 // ---- 済んだ物
 function pad(n){return String(n).padStart(2,'0');}
