@@ -488,20 +488,25 @@ function decorate(){
   const all=[];U.forEach(n=>st.S[n].lines.forEach(l=>all.push({n,l})));
   all.forEach(({l})=>{l.made=l.q;l.sent=l.q;l.ot=now-(15+r2()*40)*MIN;l.mt=l.ot+4*MIN;l.fresh=0;});
   const sh=a=>a.map(x=>[r2(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
-  const S1=sh(all),seen=new Set(),pu=[];
-  S1.forEach(o=>{if(!seen.has(o.l.m)){seen.add(o.l.m);pu.push(o);}});
-  pu.forEach(o=>{o.l.q=1;});
-  let extra=21-pu.length;
-  for(let i=0;extra>0;i++,extra--)pu[3+i%(pu.length-3)].l.q++;
-  const late=[11.6,10.9,10.3];
-  pu.forEach((o,i)=>{o.l.made=0;o.l.sent=0;o.l.mt=0;o.l.ot=now-(i<3?late[i]:0.4+r2()*8.8)*MIN;});
-  const part=pu.slice(3).find(o=>o.l.q===2);
+  // まだ作っていない行：[品, 数, 何分前の注文か]。入れ替え直後に同じ品が固まって入り、少しあとにも1〜2件
+  const PEND=[[4,1,10.4],[4,1,9.0],[4,1,8.8],[4,2,8.6],[4,1,8.5],[4,1,3.4],
+    [9,1,10.2],[9,2,8.9],[9,1,8.6],[9,1,8.4],[9,1,1.8],
+    [12,1,10.5],[12,1,9.0],[12,1,8.8],[12,2,7.9],
+    [5,1,10.3],[5,1,4.4],[13,2,6.9],[13,1,5.0],[0,1,6.2],[0,1,1.0],[11,1,5.6],[10,1,3.3]];
+  const S1=sh(all),used=new Set(),seats=new Set(),pu=[];
+  PEND.forEach(([m,q,age])=>{
+    const o=S1.find(x=>!seats.has(x.n)&&!st.S[x.n].lines.some(l=>l!==x.l&&l.m===m));
+    seats.add(o.n);used.add(o.l.id);
+    o.l.m=m;o.l.q=q;o.l.made=0;o.l.sent=0;o.l.mt=0;o.l.ot=now-age*MIN;pu.push(o);
+  });
+  const part=pu.find(o=>o.l.m===13&&o.l.q===2);
   part.l.made=1;part.l.mt=now-3*MIN;
-  const used=new Set(pu.map(o=>o.l.id)),seats=new Set([part.n]),qs=[1,1,1,2];let k=0;
+  const qs=[1,1,1,2];let k=0;
   S1.forEach(o=>{if(k<4&&!used.has(o.l.id)&&!seats.has(o.n)){seats.add(o.n);o.l.q=qs[k++];o.l.made=o.l.q;o.l.sent=0;o.l.mt=now-(2+r2()*7)*MIN;o.l.ot=o.l.mt-4*MIN;}});
   st.calls[part.n]=true;st.calls[U.find((n,i)=>i>=10&&n!==part.n)]=true;
-  const it=[4,11,0,13,5,9,12,1],iq=[1,1,2,1,1,1,1,1];
-  NEWQ=it.map((m,i)=>[U[(i*5+2)%U.length],m,iq[i]]);
+  // あとから入る注文：人気の品が多め。偶数番目は同じ品の注文がある席に足す（既存のかたまりに札が増える）
+  const it=[4,9,4,12,9,4,5,9],iq=[1,1,1,1,2,1,1,1];
+  NEWQ=it.map((m,i)=>{const o=i%2===0?pu.find(x=>x.l.m===m&&x.l.ot>now-9.5*MIN&&x.l.ot<now-8*MIN):null;return [o?o.n:U[(i*5+2)%U.length],m,iq[i]];});
   nextTick=now+10000;added=0;
 }
 function tick(){
