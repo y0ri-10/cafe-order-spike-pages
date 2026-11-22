@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>店員用（見本）</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#fff}
+body{height:100dvh;display:flex;flex-direction:column;color:#222;font-size:14px;
+  font-family:-apple-system,"Hiragino Sans","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:#222;cursor:pointer;margin:0;border:1px solid #ccc;background:#fff;border-radius:8px;padding:5px 10px;min-height:36px;line-height:1.2;white-space:nowrap}
+button:active{opacity:.8}
+button.on{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+button:disabled{color:#bbb;border-color:#e3e3e3;background:#fff;cursor:default}
+button.on:disabled{background:#bbb;border-color:#bbb;color:#fff}
+button.danger{color:#d32f2f;border-color:#d32f2f}
+button.danger:disabled{color:#bbb;border-color:#e3e3e3}
+b{font-weight:700}
+input{font:inherit;color:#222;min-height:36px;min-width:0;border:1px solid #ccc;border-radius:8px;padding:0 8px;background:#fff;text-align:right}
+.num,.amt{font-variant-numeric:tabular-nums;white-space:nowrap}
+.warn{color:#d32f2f}
+.scr{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+
+#v-reg .hwrap{position:relative;flex:none;z-index:6}
+#v-reg .hdr{display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid #e3e3e3;min-height:46px;background:#fff}
+#v-reg .hdr .t{font-size:16px;font-weight:700}
+#v-reg .hdr .sum{color:#555;white-space:nowrap}
+#v-reg .hdr .sp{flex:1}
+#v-reg .hdr .fbtn{min-width:56px}
+#v-reg .hdr .fbtn.off{visibility:hidden}
+#v-reg .cband{position:absolute;left:0;right:0;top:100%;display:flex;align-items:center;gap:8px;padding:6px 12px;background:#fff;border-bottom:1px solid #ccc;min-height:46px}
+#v-reg .cband span{flex:1}
+#v-reg main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
+#v-reg .mapwrap{display:flex;flex-direction:column;min-height:0;min-width:0;padding:10px}
+#v-reg .maptop{flex:none;display:flex;align-items:center;gap:8px;margin-bottom:6px;height:38px}
+#v-reg .maptop .edge{flex:1;display:flex;justify-content:space-between;font-size:11px;color:#888}
+#v-reg .maptop .edge b{color:#555}
+#v-reg .maptop .mvbar{flex:1;display:flex;align-items:center;gap:8px;height:100%;padding:0 6px 0 12px;border:1px solid #1d5fb8;background:#e8f0fb;border-radius:8px;color:#12407f;font-weight:700}
+#v-reg .maptop .mvbar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v-reg .maptop .mvbar button{min-height:30px}
+#v-reg .edge2{flex:none;display:flex;justify-content:flex-end;font-size:11px;color:#888;height:16px;line-height:16px}
+#v-reg .map{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(30px,1fr);gap:6px 16px;overflow:auto}
+#v-reg .kitchen{display:flex;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:8px;color:#bbb}
+#v-reg .table{grid-column:var(--c);grid-row:var(--r);display:flex;min-height:0}
+#v-reg .seats{flex:1;min-width:0;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}
+#v-reg .seat{position:relative;padding:0;min-height:0;min-width:0;font-weight:700;font-size:17px;border-radius:6px}
+#v-reg .seat.empty{color:#888;border-color:#ccc}
+#v-reg .seat.seated{color:#bbb;border-color:#e3e3e3;font-weight:400}
+#v-reg .seat.unpaid{background:#e8f0fb;border-color:#1d5fb8;color:#12407f}
+#v-reg .seat.unpaid.on{background:#1d5fb8;color:#fff}
+#v-reg .seat i{position:absolute;top:0;right:3px;font-size:10px;font-style:normal;line-height:1.3}
+#v-reg .seat.dim{opacity:.3}
+#v-reg .seat.tgt{border:2px solid #1d5fb8;color:#12407f;background:#fff}
+#v-reg .pay{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;border-left:1px solid #e3e3e3;background:#fff}
+#v-reg .selbar{flex:none;display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid #e3e3e3;min-height:46px}
+#v-reg .selbar b{flex:1;font-size:15px}
+#v-reg .selbar b.none{color:#bbb}
+#v-reg .selbar button{min-width:44px;padding:0 10px}
+#v-reg .body{flex:1;min-height:0;overflow-y:auto;padding:8px 12px}
+#v-reg .hint{text-align:center;color:#bbb;font-weight:700;font-size:13px;margin:4px 0 8px}
+#v-reg .card{margin-bottom:12px}
+#v-reg .hd{display:flex;align-items:center;gap:6px;min-height:40px;border-bottom:1px solid #e3e3e3}
+#v-reg .hd .hn{flex:1;font-weight:700;font-size:15px}
+#v-reg .hd .flg{width:36px;padding:0}
+#v-reg .hd .amt{min-width:68px;text-align:right}
+#v-reg .hd button{min-height:32px;padding:3px 9px}
+#v-reg .line{display:flex;align-items:center;gap:8px;min-height:42px;border-bottom:1px solid #f0f0f0}
+#v-reg .line .nm{flex:1;min-width:0}
+#v-reg .line .amt{width:62px;text-align:right}
+#v-reg .line.z .nm,#v-reg .line.z .amt,#v-reg .line.z .q{color:#bbb}
+#v-reg .stp{display:inline-flex;align-items:center;gap:4px}
+#v-reg .stp button{width:34px;padding:0;min-height:32px;font-weight:700}
+#v-reg .stp b{min-width:22px;text-align:center}
+#v-reg .foot{position:relative;flex:none;padding:8px 12px 12px;border-top:1px solid #e3e3e3;background:#fff}
+#v-reg .drow{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px}
+#v-reg .drow .dbtn{min-width:120px;font-weight:700;text-align:center}
+#v-reg .dpop{position:absolute;right:0;bottom:100%;margin-bottom:4px;width:220px;display:flex;flex-direction:column;gap:6px;padding:8px;background:#fff;border:1px solid #ccc;border-radius:12px;z-index:3}
+#v-reg .dpop button{min-height:42px;font-weight:700}
+#v-reg .pamph{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;margin-bottom:4px;border-top:1px solid #f0f0f0;padding-top:4px;font-weight:700}
+#v-reg .pamph .num{font-weight:400;color:#555;margin-left:6px}
+#v-reg .pamph .bulk{margin-left:0}
+#v-reg .total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+#v-reg .total b{font-size:22px}
+#v-reg .main{width:100%;padding:13px;background:#1d5fb8;border-color:#1d5fb8;color:#fff;font-weight:700;font-size:15px}
+#v-reg .main:disabled{background:#bbb;border-color:#bbb;color:#fff}
+#v-reg .toast{position:absolute;left:12px;right:12px;bottom:100%;margin-bottom:6px;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:2}
+#v-reg .toast span{flex:1}
+#v-reg .toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700;min-height:32px}
+#v-reg .ar{display:flex;align-items:center;gap:8px;min-height:42px;border-bottom:1px solid #f0f0f0}
+#v-reg .ar .nm{flex:1;min-width:0}
+#v-reg .ar .p{width:44px;text-align:right;color:#555}
+#v-reg .ar.so .nm,#v-reg .ar.so .p{color:#bbb}
+#v-reg .ar em{font-style:normal;color:#d32f2f;font-size:12px;font-weight:700;margin-left:4px}
+#v-reg .ov{position:absolute;inset:0;background:rgba(0,0,0,.28);display:flex;padding:28px 40px;z-index:10}
+#v-reg .win{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:12px;overflow:hidden}
+#v-reg .whead{flex:none;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-bottom:1px solid #e3e3e3}
+#v-reg .whead b{flex:1;font-size:16px}
+#v-reg .whead button{width:48px;padding:0}
+#v-reg .wbody{flex:1;min-height:0;display:grid;grid-template-columns:150px 1fr}
+#v-reg .wlist{padding:10px;display:flex;flex-direction:column;gap:8px;border-right:1px solid #e3e3e3}
+#v-reg .wlist button{font-weight:700;min-height:44px}
+#v-reg .wcont{min-height:0;overflow-y:auto;padding:8px 14px}
+#v-reg .wtool{display:flex;justify-content:flex-end;padding-bottom:6px}
+#v-reg .hbtn{display:flex;width:100%;align-items:center;gap:10px;min-height:42px;margin-bottom:4px;text-align:left}
+#v-reg .hbtn.open{border-color:#1d5fb8}
+#v-reg .hbtn .ht{width:46px;color:#555}
+#v-reg .hbtn .hs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#v-reg .hbtn .hf{width:14px}
+#v-reg .hbtn .ha{font-weight:700;min-width:72px;text-align:right}
+#v-reg .hdet{padding:0 4px 8px}
+#v-reg .hdet .line{min-height:34px}
+#v-reg .hdet .line.act{border-bottom:0;justify-content:flex-end}
+#v-reg .fcard{display:flex;gap:8px;align-items:baseline;padding:9px 0;border-bottom:1px solid #f0f0f0}
+#v-reg .fcard b{flex:1}
+#v-reg .fcard span{color:#555}
+#v-reg .srow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f0f0;min-height:40px;gap:8px}
+#v-reg .srow.h{color:#555;font-size:13px;border:0;padding-top:14px}
+#v-reg .srow.it{padding:6px 0;min-height:34px}
+#v-reg .srow .s{flex:1}
+#v-reg .srow.so .s{color:#bbb}
+#v-reg .srow .tag{width:64px;color:#d32f2f;font-weight:700;font-size:13px;text-align:center}
+#v-reg .sob{width:84px;padding:3px 6px;min-height:32px;font-size:13px}
+#v-reg .fld{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+#v-reg .fld .l{flex:1}
+#v-reg .fld input{width:120px}
+#v-reg .blk{border:1px solid #e3e3e3;border-radius:10px;padding:8px 10px;margin-bottom:10px}
+#v-reg .bh{font-size:13px;color:#555;margin-bottom:4px}
+#v-reg .mvrow{display:flex;gap:6px;align-items:center;margin-top:6px}
+#v-reg .mvrow input{width:80px}
+#v-reg .mvrow input.memo{flex:1;text-align:left;width:auto}
+#v-reg .mvrow button{padding:0 10px;flex:none}
+#v-reg .note{color:#555;padding:12px 0}
+#v-reg .setbtn{display:block;width:100%;min-height:52px;font-size:16px;font-weight:700;text-align:left;padding:0 14px;margin-bottom:8px}
+@media (max-width:700px){#v-reg .hdr{padding:4px 8px;gap:5px;min-height:42px}
+#v-reg .hdr .t{font-size:14px}
+#v-reg .hdr .sum{font-size:11px}
+#v-reg .hdr button{min-height:32px;padding:3px 7px;font-size:12px}
+#v-reg .hdr .fbtn{min-width:0}
+#v-reg .cband{padding:4px 8px}
+#v-reg main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 52%}
+#v-reg .pay{border-left:0;border-top:1px solid #e3e3e3}
+#v-reg .mapwrap{padding:6px 8px}
+#v-reg .maptop{height:34px;margin-bottom:4px}
+#v-reg .map{grid-auto-rows:minmax(26px,1fr);gap:4px 10px}
+#v-reg .seat{font-size:14px}
+#v-reg .selbar{min-height:40px;padding:3px 12px}
+#v-reg .body{padding:4px 12px}
+#v-reg .hd{min-height:36px}
+#v-reg .line{min-height:38px}
+#v-reg .foot{padding:4px 12px 8px}
+#v-reg .drow,#v-reg .pamph{min-height:34px}
+#v-reg .pamph{margin-bottom:2px;padding-top:2px}
+#v-reg .drow button,#v-reg .pamph .stp button{min-height:30px}
+#v-reg .total{margin-bottom:4px}
+#v-reg .total b{font-size:18px}
+#v-reg .main{padding:10px}
+#v-reg .ov{padding:10px}
+#v-reg .wbody{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+#v-reg .wlist{flex-direction:row;border-right:0;border-bottom:1px solid #e3e3e3;padding:8px;gap:6px}
+#v-reg .wlist button{flex:1;padding:3px 2px;font-size:13px;min-height:38px}}
+#v-wai .hwrap{position:relative;flex:none;z-index:6}
+#v-wai .hdr{display:flex;align-items:center;gap:12px;padding:6px 12px;border-bottom:1px solid #e3e3e3;min-height:46px;background:#fff}
+#v-wai .hdr .t{font-size:16px;font-weight:700}
+#v-wai .hdr .cnt{color:#1d5fb8;font-size:16px;white-space:nowrap}
+#v-wai .hdr .sp{flex:1}
+#v-wai .hdr .chip{color:#d32f2f;border:1px solid #d32f2f;border-radius:8px;padding:4px 10px;font-weight:700;white-space:nowrap}
+#v-wai .hdr .chip.off{visibility:hidden}
+#v-wai main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
+#v-wai .mapwrap{display:flex;flex-direction:column;min-height:0;min-width:0;padding:10px}
+#v-wai .maptop{flex:none;display:flex;align-items:center;gap:8px;margin-bottom:6px;height:38px}
+#v-wai .maptop .edge{flex:1;display:flex;justify-content:space-between;font-size:11px;color:#888}
+#v-wai .maptop .edge b{color:#555}
+#v-wai .maptop .mvbar{flex:1;display:flex;align-items:center;gap:8px;height:100%;padding:0 6px 0 12px;border:1px solid #1d5fb8;background:#e8f0fb;border-radius:8px;color:#12407f;font-weight:700}
+#v-wai .maptop .mvbar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v-wai .maptop .mvbar button{min-height:30px}
+#v-wai .edge2{flex:none;display:flex;justify-content:flex-end;font-size:11px;color:#888;height:16px;line-height:16px}
+#v-wai .map{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px 16px;overflow:auto;padding:4px}
+#v-wai .kitchen{display:flex;align-items:center;justify-content:center;border:1px dashed #ccc;border-radius:8px;color:#bbb}
+#v-wai .table{grid-column:var(--c);grid-row:var(--r);display:flex;min-height:0}
+#v-wai .seats{flex:1;min-width:0;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}
+#v-wai .seat{position:relative;padding:0;min-height:40px;min-width:34px;font-weight:700;font-size:17px;border-radius:6px}
+#v-wai .seat.empty{color:#888;border-color:#ccc;background:#fff;font-weight:400}
+#v-wai .seat.seated{background:#eee;border-color:#e0e0e0;color:#777;font-weight:400}
+#v-wai .seat.mkg{background:#e8f0fb;border-color:#b9d0f0;color:#12407f}
+#v-wai .seat.rdy{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+#v-wai .seat.call{border:2px solid #d32f2f;color:#d32f2f}
+#v-wai .seat.call.rdy{background:#fff}
+#v-wai .seat i{position:absolute;top:1px;right:3px;font-size:9px;font-style:normal;line-height:1.3;color:#1d5fb8}
+#v-wai .seat.pk{outline:3px solid #222;outline-offset:1px;z-index:1}
+#v-wai .seat.dim{opacity:.3}
+#v-wai .seat.tgt{border:2px solid #1d5fb8;color:#12407f;background:#fff}
+#v-wai .pay{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;border-left:1px solid #e3e3e3;background:#fff}
+#v-wai .selbar{flex:none;display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid #e3e3e3;min-height:46px}
+#v-wai .selbar b{flex:1;font-size:15px}
+#v-wai .selbar b em{font-style:normal;color:#d32f2f;font-size:12px;margin-left:8px}
+#v-wai .selbar button{min-width:44px;padding:0 10px}
+#v-wai .selbar .seg{min-width:72px;font-weight:700}
+#v-wai .selbar .smp{flex:1;color:#888;font-size:11px}
+#v-wai .seattop{position:relative;flex:none;padding:6px 12px 0}
+#v-wai .stat{display:flex;align-items:center;gap:10px;min-height:46px}
+#v-wai .stat button{min-width:96px;min-height:44px;font-weight:700;font-size:15px}
+#v-wai .stat .tot{flex:1;text-align:right;color:#888;font-size:12px}
+#v-wai .hd{display:flex;align-items:center;gap:6px;min-height:40px;border-bottom:1px solid #e3e3e3}
+#v-wai .hd .hn{flex:1;font-weight:700;font-size:15px}
+#v-wai .hd button{min-height:32px;padding:3px 9px}
+#v-wai .ask{position:absolute;left:12px;right:12px;top:100%;z-index:3;display:flex;align-items:center;gap:8px;padding:8px;background:#fff;border:1px solid #d32f2f;border-radius:10px}
+#v-wai .ask span{flex:1;color:#d32f2f;font-weight:700}
+#v-wai .body{flex:1;min-height:0;overflow-y:auto;padding:8px 12px}
+#v-wai .note{text-align:center;color:#bbb;font-weight:700;padding:16px 0}
+#v-wai .row{display:flex;align-items:center;gap:10px;min-height:58px;border:1px solid #e3e3e3;border-radius:10px;padding:6px 8px 6px 10px;margin-bottom:6px;cursor:pointer}
+#v-wai .row.pk{border:2px solid #1d5fb8;padding:5px 7px 5px 9px}
+#v-wai .row.new{background:#e8f0fb}
+#v-wai .row.call{border-color:#d32f2f}
+#v-wai .row.call.pk{border-color:#d32f2f}
+#v-wai .row.call .nm{color:#d32f2f;font-weight:700}
+#v-wai .sn{width:44px;flex:none;font-size:24px;font-weight:700;line-height:1;text-align:center}
+#v-wai .sn small{display:block;font-size:10px;font-weight:400;color:#888;margin-bottom:2px}
+#v-wai .row .nm{flex:1;min-width:0}
+#v-wai .mn{color:#555;white-space:nowrap}
+#v-wai .dl{min-width:72px;min-height:46px;font-weight:700;flex:none}
+#v-wai .gl{flex:1;min-width:0}
+#v-wai .gi{display:flex;align-items:center;gap:8px;min-height:30px}
+#v-wai .gi>span:first-child{flex:1;min-width:0}
+#v-wai .gi button{min-height:32px;padding:3px 9px}
+#v-wai .line{display:flex;align-items:center;gap:6px;min-height:46px;border-bottom:1px solid #f0f0f0}
+#v-wai .line .nm{flex:1;min-width:0}
+#v-wai .line .tg{width:74px;flex:none;text-align:center;font-size:11px;padding:3px 0;border:1px solid #ccc;border-radius:6px;color:#555}
+#v-wai .line .tg.t-rd{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+#v-wai .line .act{width:54px;flex:none}
+#v-wai .line .act button{width:100%;min-height:36px;padding:3px 0;font-weight:700}
+#v-wai .line.z .nm,#v-wai .line.z .q{color:#bbb}
+#v-wai .line.z .tg{opacity:.4}
+#v-wai .stp{display:inline-flex;align-items:center;gap:2px;flex:none}
+#v-wai .stp button{width:30px;padding:0;min-height:32px;font-weight:700}
+#v-wai .stp b{min-width:20px;text-align:center}
+#v-wai .foot{flex:none;padding:8px 12px 12px;border-top:1px solid #e3e3e3;background:#fff}
+#v-wai .main{width:100%;padding:13px;background:#1d5fb8;border-color:#1d5fb8;color:#fff;font-weight:700;font-size:15px}
+#v-wai .main:disabled{background:#bbb;border-color:#bbb;color:#fff}
+#v-wai .toast{position:absolute;left:12px;right:12px;bottom:8px;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:5}
+#v-wai .toast span{flex:1}
+#v-wai .toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700;min-height:32px}
+#v-wai .ar{display:flex;align-items:center;gap:8px;min-height:42px;border-bottom:1px solid #f0f0f0}
+#v-wai .ar .nm{flex:1;min-width:0}
+#v-wai .ar .p{width:44px;text-align:right;color:#555}
+#v-wai .ar.so .nm,#v-wai .ar.so .p{color:#bbb}
+#v-wai .ar em{font-style:normal;color:#d32f2f;font-size:12px;font-weight:700;margin-left:4px}
+@media (max-width:700px){#v-wai .hdr{padding:4px 8px;gap:8px;min-height:42px}
+#v-wai .hdr .t{font-size:14px}
+#v-wai .hdr .cnt{font-size:15px}
+#v-wai main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 52%}
+#v-wai .pay{border-left:0;border-top:1px solid #e3e3e3}
+#v-wai .mapwrap{padding:6px 8px}
+#v-wai .maptop{height:34px;margin-bottom:4px}
+#v-wai .map{gap:4px 10px}
+#v-wai .seat{font-size:15px}
+#v-wai .selbar{min-height:42px;padding:3px 12px}
+#v-wai .body{padding:6px 12px}
+#v-wai .seattop{padding:2px 12px 0}
+#v-wai .stat{min-height:46px}
+#v-wai .foot{padding:6px 12px 8px}
+#v-wai .main{padding:11px}}
+#v-kit .hdr{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:6px 12px;border-bottom:1px solid #e3e3e3;min-height:50px;background:#fff}
+#v-kit .hdr .t{font-size:16px;font-weight:700}
+#v-kit .hdr .sum{color:#555;white-space:nowrap}
+#v-kit .hdr .sum b{font-size:18px;color:#222}
+#v-kit .hdr .sp{flex:1}
+#v-kit .wgrp{display:flex;align-items:center;gap:6px}
+#v-kit .wgrp small{font-size:11px;color:#888;margin-right:2px}
+#v-kit .wgrp button{min-height:36px;padding:3px 9px}
+#v-kit .stn{flex:none;display:flex;gap:8px;padding:8px 12px;overflow-x:auto;overflow-y:hidden;border-bottom:1px solid #e3e3e3;scrollbar-width:none}
+#v-kit .stn::-webkit-scrollbar{display:none}
+#v-kit .stn button{flex:none;min-height:44px;font-weight:700;font-size:15px}
+#v-kit .stn small{font-size:12px;font-weight:400;margin-left:4px;min-width:1ch;display:inline-block}
+#v-kit main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 220px}
+#v-kit .list{min-height:0;overflow-y:auto;padding:10px 12px 70px;display:flex;flex-direction:column;gap:10px}
+#v-kit .empty{color:#bbb;text-align:center;padding:40px 0;font-size:16px}
+#v-kit .grp{flex:none;border:1px solid #ccc;border-radius:8px;padding:8px 10px 10px;background:#fff}
+#v-kit .grp.first{border:3px solid #1d5fb8;padding:6px 8px 8px}
+#v-kit .grp.fresh{background:#e8f0fb}
+#v-kit .gh{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+#v-kit .gh .nx{font-size:11px;font-weight:700;color:#1d5fb8;align-self:flex-start;margin-top:3px}
+#v-kit .gh .gname{flex:1;min-width:0;font-size:20px;font-weight:700}
+#v-kit .gh .gcnt{font-size:28px;font-weight:700;line-height:1}
+#v-kit .gh .gcnt.z{color:#bbb}
+#v-kit .toks{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+#v-kit .tok{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;min-height:52px;padding:6px 10px;border-radius:8px;text-align:left}
+#v-kit .tok .sn{font-size:18px;font-weight:700}
+#v-kit .tok .q{font-weight:700;font-size:16px}
+#v-kit .tok .mn{margin-left:auto;color:#555}
+#v-kit .tok .mn.late{color:#d32f2f;font-weight:700}
+#v-kit .tok em{flex-basis:100%;font-style:normal;color:#d32f2f;font-size:12px;font-weight:700}
+#v-kit .tok.fresh{background:#e8f0fb}
+#v-kit .tok.done{background:#f3f3f3;border-color:#e3e3e3}
+#v-kit .tok.done .sn,#v-kit .tok.done .q,#v-kit .tok.done .mn,#v-kit .tok.done em{color:#bbb;font-weight:400}
+#v-kit .side{border-left:1px solid #e3e3e3;padding:10px 14px;overflow-y:auto;min-height:0}
+#v-kit .side h3{margin:0 0 6px;font-size:13px;font-weight:400;color:#555}
+#v-kit .sr{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0}
+#v-kit .sr b{font-size:16px}
+#v-kit .toast{position:absolute;left:12px;right:12px;bottom:12px;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:30}
+#v-kit .toast span{flex:1}
+#v-kit .toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700;min-height:40px}
+#v-kit .ov{position:absolute;inset:0;background:rgba(0,0,0,.28);display:flex;padding:28px 40px;z-index:10}
+#v-kit .win{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:12px;overflow:hidden}
+#v-kit .whead{flex:none;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-bottom:1px solid #e3e3e3}
+#v-kit .whead b{flex:1;font-size:16px}
+#v-kit .whead button{width:48px;padding:0}
+#v-kit .wcont{flex:1;min-height:0;overflow-y:auto;padding:8px 14px}
+#v-kit .srow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;min-height:50px;gap:8px}
+#v-kit .srow.h{color:#555;font-size:13px;border:0;padding-top:14px;min-height:0}
+#v-kit .srow .s{flex:1}
+#v-kit .srow.so .s{color:#bbb}
+#v-kit .srow .tag{width:64px;color:#d32f2f;font-weight:700;font-size:13px;text-align:center}
+#v-kit .sob{width:92px;padding:3px 6px;min-height:44px;font-size:14px}
+@media (max-width:700px){#v-kit main{grid-template-columns:1fr}
+#v-kit .side{display:none}
+#v-kit .hdr{padding:4px 8px;gap:4px 8px}
+#v-kit .hdr .sp{display:none}
+#v-kit .hdr .so-btn{margin-left:auto}
+#v-kit .wgrp{order:5;flex-basis:100%}
+#v-kit .wgrp button{flex:1;padding:3px 4px}
+#v-kit .wgrp small{margin-right:4px}
+#v-kit .stn{padding:6px 8px}
+#v-kit .list{padding:8px 8px 70px}
+#v-kit .ov{padding:10px}}
+/* ---- 3画面そろえ・追加分 */
+.swb{display:flex;align-items:center;gap:6px;flex:none}
+.swb small{font-size:11px;color:#888;white-space:nowrap}
+.sw{display:flex;gap:6px}
+.sw button{min-height:36px;padding:3px 12px;font-weight:700}
+.qbtn{width:48px;min-width:48px;height:48px;min-height:48px;padding:0;font-size:20px;font-weight:700;flex:none}
+#v-reg .hdr,#v-wai .hdr,#v-kit .hdr{min-height:56px;padding:4px 12px;flex-wrap:nowrap;gap:10px}
+#v-reg .hdr .t,#v-wai .hdr .t,#v-kit .hdr .t{font-size:16px;font-weight:700;white-space:nowrap}
+.scr .ov{position:absolute;inset:0;background:rgba(0,0,0,.28);display:flex;padding:28px 40px;z-index:10}
+.scr .win{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid #ccc;border-radius:12px;overflow:hidden}
+.scr .whead{flex:none;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-bottom:1px solid #e3e3e3}
+.scr .whead b{flex:1;font-size:16px}
+.scr .whead button{width:48px;padding:0}
+#v-reg .win.hw,#v-wai .win.hw,#v-kit .win.hw{flex:none;align-self:center;margin:0 auto;width:100%;max-width:460px}
+.hbody{padding:10px 16px 14px}
+.hbody p{margin:0;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:15px}
+.hbody p:last-child{border-bottom:0}
+
+/* ウェイター：行の2つの印 */
+#v-wai .line{flex-wrap:wrap;gap:2px 6px;padding:4px 0 6px;min-height:0}
+#v-wai .line .nm{flex:1;min-width:0}
+#v-wai .line .mk{flex:1 0 100%;display:flex;gap:6px}
+#v-wai .line .mk button{flex:1;min-height:36px;padding:3px 4px;font-weight:700}
+#v-wai .line .mk button.part{background:#e8f0fb;border-color:#1d5fb8;color:#12407f}
+#v-wai .line.z .mk button{opacity:.5}
+#v-wai .dl{min-width:96px}
+#v-wai .hdr .cnt{font-size:16px}
+
+/* キッチン */
+#v-kit .hdr .sp{flex:1}
+#v-kit .lw{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column}
+#v-kit .list{flex:1}
+#v-kit main{grid-template-columns:1fr 290px}
+#v-kit .stn{flex-wrap:wrap;overflow:visible}
+#v-kit .grp .gh{margin-bottom:8px}
+#v-kit .gh .gname{flex:none;font-size:22px;font-weight:700}
+#v-kit .gh em{font-style:normal;color:#d32f2f;font-size:12px;font-weight:700}
+#v-kit .toks{display:flex;flex-wrap:wrap;gap:8px}
+#v-kit .tok{width:72px;height:72px;min-height:72px;padding:0;border:2px solid #888;border-radius:8px;background:#fff;font-size:34px;line-height:1;color:#9a9a9a;display:flex;align-items:center;justify-content:center}
+#v-kit .tok.fresh{background:#e8f0fb}
+#v-kit .tok.late{border-color:#d32f2f;background:#fdeaea}
+#v-kit .tok.done{background:#f0f0f0;border-color:#e0e0e0;color:#9a9a9a}
+#v-kit .side{padding:8px 12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#v-kit .side h3{flex:none;margin:0 0 4px;font-size:13px;font-weight:400;color:#555}
+#v-kit .prs{flex:1;min-height:0;overflow-y:auto}
+#v-kit .pr{display:flex;align-items:center;gap:8px;min-height:58px;padding:4px 0;border-bottom:1px solid #f0f0f0}
+#v-kit .pr .pn{flex:1;min-width:0;font-size:14px}
+#v-kit .pr .ps{font-size:18px;white-space:nowrap}
+#v-kit .pr button{min-height:44px;min-width:92px;font-weight:700}
+#v-kit .note{text-align:center;color:#bbb;font-weight:700;padding:16px 0}
+#v-kit button.on{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+
+@media (max-width:700px){
+  #v-reg .hdr,#v-wai .hdr,#v-kit .hdr{flex-wrap:wrap;gap:2px 6px;padding:4px 8px;min-height:0}
+  .hdr>*{order:2}
+  .hdr>.swb{order:0;flex:0 0 calc(100% - 54px)}
+  .hdr>.qbtn{order:1}
+  .sw{flex:1}
+  .sw button{flex:1;padding:3px 4px}
+  #v-reg .hdr .t,#v-wai .hdr .t,#v-kit .hdr .t{font-size:14px}
+  #v-reg .hdr button,#v-wai .hdr .sw button{min-height:32px}
+  #v-reg .hdr .qbtn{min-height:48px;padding:0;font-size:20px}
+  #v-reg .hdr .sw button{padding:3px 4px}
+  #v-reg .hdr .fbtn.off{display:none}
+  #v-reg .hdr .fbtn{padding:3px 5px}
+  #v-reg .hdr .sum{font-size:11px}
+  #v-kit .hdr .wgrp small{display:none}
+  #v-kit .hdr .wgrp button{padding:3px 6px;font-size:12px;min-height:32px}
+  #v-kit .hdr .so-btn{margin-left:auto;padding:3px 8px;font-size:12px;min-height:32px}
+  #v-kit .hdr .sp{display:none}
+  #v-kit main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 176px}
+  #v-kit .side{border-left:0;border-top:1px solid #e3e3e3;padding:6px 10px}
+  #v-kit .stn{padding:6px 8px;gap:6px}
+  #v-kit .stn button{min-height:38px;font-size:14px;padding:3px 9px}
+  #v-kit .list{padding:8px 8px 70px}
+  .scr .ov{padding:10px}
+}
+
+</style>
+</head>
+<body>
+<div class="scr" id="v-reg" data-scr="reg"></div>
+<div class="scr" id="v-wai" data-scr="wai" hidden></div>
+<div class="scr" id="v-kit" data-scr="kit" hidden></div>
+<script>
+const ROOM={tables:[[1,1,3],[2,1,3],[3,1,3],[1,2,3],[2,2,3],[3,2,3],[1,3,3],[2,3,3],[3,3,3],[1,4,3],[2,4,3],[3,4,3],[1,5,3],[2,5,3],[3,5,3],
+  [2,6,3],[3,6,3],[2,7,3],[3,7,3],[2,8,3],[3,8,3],[2,9,3],[3,9,3],[2,10,3],[3,10,3],[2,11,3],[3,11,3],[2,12,3],[3,12,3]],
+  blocks:[["キッチン",1,8,5]]};
+function numberSeats(tables){let k=0;return tables.map((t,i)=>({i,c:t[0],r:t[1],n:t[2]})).sort((a,b)=>a.r-b.r||a.c-b.c)
+  .map(t=>({...t,seats:Array.from({length:t.n},()=>String(++k))})).sort((a,b)=>a.i-b.i);}
+const TB=numberSeats(ROOM.tables);
+const SEATS=TB.flatMap(t=>t.seats).sort((a,b)=>a-b);
+const ORD=Object.fromEntries(SEATS.map((n,i)=>[n,i]));
+const PAMPH=500,PAMPH2=800;
+// パンフレット：2冊ごとに800円、余った1冊は500円（1冊500・2冊800・3冊1,300・4冊1,600）
+const pamphAmt=n=>Math.floor(n/2)*PAMPH2+(n%2)*PAMPH;
+const DISCS=[["なし",0],["部員 −100円",100],["お詫び −300円",300],["無料",Infinity]];
+const TABS=[["hist","履歴"],["sales","売上"],["close","締め"],["soldout","売り切れ"],["set","設定"]];
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const yen=v=>v.toLocaleString('ja-JP');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hhmm=d=>d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+const num=v=>{const n=parseInt(String(v).normalize('NFKC').replace(/[^\d]/g,''),10);return isNaN(n)?0:n;};
+const CATN=["フード","ホットドリンク","スイーツ","アイスドリンク","オリジナルドリンク"];
+// [品名, 値段, 持ち場(CATN の番号)]
+const MENU=[["永遠の愛",400,4],["誰もが憧れるベリーソーダ",300,4],["自由を求めるクリームソーダ",400,4],["革命の歌 明日への希望を掲げて",400,4],
+  ["コーヒー HOT",300,1],["コーヒー ICE",300,3],["紅茶 HOT",300,1],["紅茶 ICE",300,3],["ココア",300,1],["カフェラテ",300,1],
+  ["オレンジジュース",300,3],["ホットサンド",500,0],["カレーライス",600,0],["マフィン",400,2],["クッキー",300,2]];
+const MIN=60000;
+const linesSum=L=>L.reduce((s,l)=>s+MENU[l.m][1]*l.q,0);
+const HELP={
+  reg:["席を押して選ぶ（まとめて何席でも選べる）","行の「− ＋」で数を直し、「足す」「移す」で注文を変える","値引きとパンフレットを選んで「会計済みにする」","間違えたら、下に出る「元に戻す」"],
+  wai:["地図の席か一覧の行を押すと、席の中身が出る","「持っていく物」は、持っていったら「持ってった」を押す","席の中身の「作った」「持ってった」は、どちらからでも押せる","呼び出しは、行ったら「行った」を押す"],
+  kit:["上から順に作る","1個作ったら、札を1枚押す（間違えたらもう一度）","赤い札は、待ちが長い物","運ぶときは、右（下）の欄の「持ってった」を押す"]
+};
+const helpHTML=k=>`<div class="ov"><div class="win hw"><div class="whead"><b>使い方</b><button data-a="hclose">✕</button></div><div class="hbody">${HELP[k].map(t=>`<p>${t}</p>`).join('')}</div></div></div>`;
+const helpBtn=()=>`<button class="qbtn" data-a="help" aria-label="使い方">？</button>`;
+const SCR=[['reg','レジ'],['wai','ウェイター'],['kit','キッチン']];
+const swHTML=()=>`<span class="swb"><span class="sw">${SCR.map(([k,t])=>`<button class="${screen===k?'on':''}" data-a="go" data-v="${k}">${t}</button>`).join('')}</span><small>見本用</small></span>`;
+
+// ---- 状態。st＝共有データ（元に戻す＝写しを戻す）
+let st, screen='reg', toast=null, toastTimer=null, nextTick=0, added=0, NEWQ=[];
+const SC={};
+const DATA=['S','sel','flags','H','nid','disc','pamph','calls'];
+const snap=()=>JSON.stringify(DATA.reduce((o,k)=>(o[k]=st[k],o),{}));
+const restore=d=>DATA.forEach(k=>{st[k]=d[k];});
+function setToast(msg,s,nav,after){toast={msg,s,nav,after};clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast=null;render();},4500);}
+function clearToast(){toast=null;clearTimeout(toastTimer);}
+function render(){SC[screen].render();}
+
+// ---- データの操作（3つの画面が同じ物を使う）
+function mkLine(m,q,o){return {id:st.nid++,m,q,ot:Date.now(),made:0,sent:0,mt:0,fresh:0,...o};}
+function lineOf(id){for(const n of SEATS){const l=st.S[n].lines.find(x=>x.id===id);if(l)return {n,l};}return null;}
+const findLine=id=>{const o=lineOf(id);return o?o.l:null;};
+function allLines(){const a=[];SEATS.forEach(n=>st.S[n].lines.forEach(l=>{if(l.q>0)a.push({n,l});}));return a;}
+function rdyLines(){return allLines().filter(o=>o.l.made>o.l.sent).sort((x,y)=>x.l.mt-y.l.mt||x.l.id-y.l.id);}
+function addOrder(n,m,q){
+  const s=st.S[n],now=Date.now(),f=s.lines.find(l=>l.m===m&&l.made===0);
+  if(f){f.q+=q;f.fresh=now+3000;}else s.lines.push(mkLine(m,q,{ot:now,fresh:now+3000}));
+  s.st='unpaid';
+}
+function restoreLines(n,ls){
+  if(st.S[n].st!=='unpaid')st.S[n]={st:'unpaid',lines:[]};
+  const d=st.S[n].lines,now=Date.now();
+  ls.forEach(l=>{const f=d.find(x=>x.m===l.m);
+    if(f){f.q+=l.q;f.made+=l.q;f.sent+=l.q;}else d.push(mkLine(l.m,l.q,{made:l.q,sent:l.q,ot:now-20*MIN,mt:now-16*MIN}));});
+}
+function setQty(l,d){l.q=Math.max(0,l.q+d);l.made=Math.min(l.made,l.q);l.sent=Math.min(l.sent,l.made);}
+function moveSeat(from,to){
+  st.S[to]=st.S[from];st.S[from]={st:'empty',lines:[]};
+  st.sel=st.sel.map(x=>x===from?to:x);
+  if(st.flags[from]){delete st.flags[from];st.flags[to]=true;}
+  if(st.calls[from]){delete st.calls[from];st.calls[to]=true;}
+}
+// 2つの印。順番は強制しない（持ってったを押すと作ったも付く）
+function toggleMade(l){if(l.made<l.q){l.made=l.q;l.mt=Date.now();}else{l.made=0;l.sent=0;}}
+function toggleSent(l){if(l.sent<l.q){if(l.made<l.q){l.made=l.q;l.mt=Date.now();}l.sent=l.q;}else l.sent=0;}
+
+function decorate(){
+  const r2=rng(77),now=Date.now();
+  const U=SEATS.filter(n=>st.S[n].st==='unpaid');
+  const all=[];U.forEach(n=>st.S[n].lines.forEach(l=>all.push({n,l})));
+  all.forEach(({l})=>{l.made=l.q;l.sent=l.q;l.ot=now-(15+r2()*40)*MIN;l.mt=l.ot+4*MIN;l.fresh=0;});
+  const sh=a=>a.map(x=>[r2(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+  const S1=sh(all),seen=new Set(),pu=[];
+  S1.forEach(o=>{if(!seen.has(o.l.m)){seen.add(o.l.m);pu.push(o);}});
+  pu.forEach(o=>{o.l.q=1;});
+  let extra=21-pu.length;
+  for(let i=0;extra>0;i++,extra--)pu[3+i%(pu.length-3)].l.q++;
+  const late=[11.6,10.9,10.3];
+  pu.forEach((o,i)=>{o.l.made=0;o.l.sent=0;o.l.mt=0;o.l.ot=now-(i<3?late[i]:0.4+r2()*8.8)*MIN;});
+  const part=pu.slice(3).find(o=>o.l.q===2);
+  part.l.made=1;part.l.mt=now-3*MIN;
+  const used=new Set(pu.map(o=>o.l.id)),seats=new Set([part.n]),qs=[1,1,1,2];let k=0;
+  S1.forEach(o=>{if(k<4&&!used.has(o.l.id)&&!seats.has(o.n)){seats.add(o.n);o.l.q=qs[k++];o.l.made=o.l.q;o.l.sent=0;o.l.mt=now-(2+r2()*7)*MIN;o.l.ot=o.l.mt-4*MIN;}});
+  st.calls[part.n]=true;st.calls[U.find((n,i)=>i>=10&&n!==part.n)]=true;
+  const it=[4,11,0,13,5,9,12,1],iq=[1,1,2,1,1,1,1,1];
+  NEWQ=it.map((m,i)=>[U[(i*5+2)%U.length],m,iq[i]]);
+  nextTick=now+10000;added=0;
+}
+function tick(){
+  if(added>=8)return;
+  const [n,m,q]=NEWQ[added++];addOrder(n,m,q);
+  setTimeout(render,3100);
+}
+
+// ---- 描画（作り直さず、変わった所だけ直す）
+function morph(a,b){
+  const ac=a.childNodes,bc=b.childNodes;
+  for(let i=0;i<bc.length;i++){
+    if(i>=ac.length){a.appendChild(bc[i].cloneNode(true));continue;}
+    const x=ac[i],y=bc[i];
+    if(x.nodeType!==y.nodeType||x.nodeName!==y.nodeName){x.replaceWith(y.cloneNode(true));continue;}
+    if(x.nodeType===3){if(x.nodeValue!==y.nodeValue)x.nodeValue=y.nodeValue;continue;}
+    for(const at of [...x.attributes])if(!y.hasAttribute(at.name))x.removeAttribute(at.name);
+    for(const at of [...y.attributes])if(x.getAttribute(at.name)!==at.value)x.setAttribute(at.name,at.value);
+    if(x.nodeName==='INPUT'&&document.activeElement!==x&&x.value!==y.getAttribute('value'))x.value=y.getAttribute('value')||'';
+    morph(x,y);
+  }
+  while(a.childNodes.length>bc.length)a.removeChild(a.lastChild);
+}
+function seed(){
+  const r=rng(20241121),pick=n=>Math.floor(r()*n);
+  st={S:{},sel:[],flags:{},calls:{},H:[],nid:1,disc:0,pamph:0,soldOut:{},cash:{start:'',moves:[],counted:''},mv:{kind:'in',amt:'',memo:''}};
+  const order=ROOM.tables.map((_,i)=>i).sort(()=>r()-.5),pOf={};
+  order.forEach((ti,k)=>{pOf[ti]=k<14?.95:k<20?.55:.05;});
+  TB.forEach((t,ti)=>{
+    const fav=[pick(15),pick(15)];
+    t.seats.forEach(n=>{
+      const x=r();let s='empty',lines=[];
+      if(x<pOf[ti]){s='unpaid';const k=1+pick(3);
+        for(let i=0;i<k;i++){const m=r()<.6?fav[pick(2)]:pick(15);const f=lines.find(l=>l.m===m);if(f)f.q++;else lines.push({m,q:r()<.15?2:1});}
+      }else if(r()<(pOf[ti]>=.5?.5:.1))s='seated';
+      st.S[n]={st:s,lines:lines.map(l=>({id:st.nid++,...l}))};
+    });
+  });
+  const now=Date.now();
+  const mk=(min,n,ls,d,flag)=>{const L=ls.map(([m,q])=>({m,q}));return {id:st.nid++,time:hhmm(new Date(now-min*60000)),seats:[{n,lines:L,gone:[]}],disc:d,pamph:0,total:Math.max(0,linesSum(L)-d),flag,fs:flag?[n]:[]};};
+  st.H=[mk(7,"40",[[4,1],[11,1]],0,false),mk(19,"18",[[12,1],[0,1]],0,true),mk(33,"27",[[1,2],[13,1]],300,false),mk(48,"55",[[5,1],[14,1]],0,false),mk(62,"4",[[2,1],[9,1],[12,1]],0,false)];
+  decorate();
+}
+
+SC.reg=(()=>{
+let hintTimer=null;
+const ui={view:'pay',addSeat:null,addQ:{},moving:null,discOpen:false,modal:false,mtab:'hist',histFlag:false,openId:null,askId:null,resetAsk:false,setNote:false,hint:false,help:false};
+const sub=n=>linesSum(st.S[n].lines);
+const selList=()=>[...st.sel].sort((a,b)=>ORD[a]-ORD[b]);
+const unpaidSeats=()=>SEATS.filter(n=>st.S[n].st==='unpaid');
+const flagCount=()=>unpaidSeats().filter(n=>st.flags[n]).length;
+const seatsSum=()=>st.sel.reduce((s,n)=>s+sub(n),0);
+const discAmt=()=>Math.min(DISCS[st.disc][1],seatsSum());
+const totalNow=()=>seatsSum()-discAmt()+pamphAmt(st.pamph);
+const salesTotal=()=>st.H.reduce((s,r)=>s+r.total,0);
+function seatBtn(n){
+  const s=st.S[n],on=st.sel.includes(n);let cls=s.st+(on?' on':''),dis='';
+  if(ui.moving){if(s.st==='empty')cls+=' tgt';else{cls+=' dim';dis='disabled';}}
+  return `<button class="seat ${cls}" data-a="seat" data-v="${n}" ${dis}>${n}${s.st==='unpaid'&&st.flags[n]?'<i>⚑</i>':''}</button>`;
+}
+function mapPane(){
+  const top=ui.moving?`<div class="mvbar"><span>移す先の空いている席を押してください</span><button data-a="movecancel">やめる</button></div>`
+    :`<div class="edge"><span></span><b>前（ショー）</b><span>ドア</span></div>`;
+  return `<section class="mapwrap"><div class="maptop">${top}</div><div class="map" data-sc="map">`
+    +ROOM.blocks.map(([nm,c,r,sp])=>`<div class="kitchen" style="grid-column:${c};grid-row:${r} / span ${sp}">${nm}</div>`).join('')
+    +TB.map(t=>`<div class="table" style="--c:${t.c};--r:${t.r}"><div class="seats">${t.seats.map(seatBtn).join('')}</div></div>`).join('')
+    +`</div><div class="edge2"><span>ドア</span></div></section>`;
+}
+const stp=l=>`<span class="stp"><button data-a="q" data-v="${l.id}:-1" ${l.q>0?'':'disabled'}>−</button><b class="q">${l.q}</b><button data-a="q" data-v="${l.id}:1">＋</button></span>`;
+function cardsHTML(){
+  const lock=ui.moving?'disabled':'';
+  return selList().map(n=>{
+    const fl=st.flags[n];
+    return `<div class="card" data-seat="${n}"><div class="hd"><span class="hn">席 ${n}</span>`
+      +`<button data-a="addopen" data-v="${n}" ${lock}>足す</button><button data-a="moveopen" data-v="${n}" ${lock}>移す</button>`
+      +`<button class="flg ${fl?'on':''}" data-a="flag" data-v="${n}">⚑</button><b class="amt">${yen(sub(n))}円</b></div>`
+      +st.S[n].lines.map(l=>`<div class="line ${l.q?'':'z'}"><span class="nm">${MENU[l.m][0]}</span><span class="amt">${yen(MENU[l.m][1]*l.q)}</span>${stp(l)}</div>`).join('')+`</div>`;
+  }).join('');
+}
+function addListHTML(){
+  return MENU.map((m,i)=>{const so=st.soldOut[i],q=ui.addQ[i]||0;
+    return `<div class="ar ${so?'so':''}"><span class="nm">${m[0]}${so?'<em>売り切れ</em>':''}</span><span class="p num">${m[1]}</span><span class="stp"><button data-a="aq" data-v="${i}:-1" ${so||!q?'disabled':''}>−</button><b>${q}</b><button data-a="aq" data-v="${i}:1" ${so?'disabled':''}>＋</button></span></div>`;}).join('');
+}
+function payPane(){
+  const adding=ui.view==='add',n=ui.addSeat,sel=selList();
+  const bar=adding?`<b>席 ${n} に足す</b><button data-a="vcancel">やめる</button>`
+    :`<b class="${sel.length?'':'none'}">${sel.length?'席 '+sel.join('・'):'席を押してください'}</b><button data-a="clearsel" ${sel.length&&!ui.moving?'':'disabled'}>✕</button>`;
+  const body=adding?addListHTML():(ui.hint?`<div class="hint">注文がありません</div>`:'')+cardsHTML();
+  const any=Object.values(ui.addQ).some(q=>q>0);
+  const canPay=(sel.length||st.pamph>0)&&!ui.moving;
+  const lk=adding||ui.moving?'disabled':'';
+  const tst=toast?`<div class="toast"><span>${toast.msg}</span><button data-a="undo">元に戻す</button></div>`:'';
+  const dpop=ui.discOpen?`<div class="dpop">${DISCS.map(([t],i)=>`<button class="${st.disc===i?'on':''}" data-a="disc" data-v="${i}">${t}</button>`).join('')}</div>`:'';
+  return `<section class="pay"><div class="selbar">${bar}</div><div class="body" data-sc="${adding?'add':'pay'}">${body}</div>`
+    +`<div class="foot">${tst}<div class="drow"><span>値引き</span><button class="dbtn ${ui.discOpen?'on':''}" data-a="discopen" ${sel.length&&!lk?'':'disabled'}>${DISCS[st.disc][0]}</button>${dpop}</div>`
+    +`<div class="pamph"><span class="pn">パンフレット <span class="num">${PAMPH}円</span><span class="num bulk"><i>・</i>2冊 ${PAMPH2}円</span></span><span class="stp"><button data-a="pq" data-v="-1" ${st.pamph>0&&!lk?'':'disabled'}>−</button><b>${st.pamph}</b><button data-a="pq" data-v="1" ${lk}>＋</button></span></div>`
+    +`<div class="total"><span>合計</span><b id="total">${yen(totalNow())}円</b></div>`
+    +(adding?`<button class="main" data-a="adddo" ${any?'':'disabled'}>足す</button>`:`<button class="main" data-a="pay" ${canPay?'':'disabled'}>会計済みにする</button>`)
+    +`</div></section>`;
+}
+// ---- メニューの窓の中身
+function histHTML(){
+  const rs=st.H.filter(r=>!ui.histFlag||r.flag);
+  const un=ui.histFlag?unpaidSeats().filter(n=>st.flags[n]):[];
+  const tool=`<div class="wtool"><button class="${ui.histFlag?'on':''}" data-a="histflag">印つきだけ</button></div>`;
+  const fcs=un.map(n=>`<div class="fcard"><b>席 ${n}</b><span>未会計</span></div>`).join('');
+  const rows=rs.map(r=>{
+    const o=ui.openId===r.id,multi=r.seats.length>1;
+    const who=r.seats.length?'席 '+r.seats.map(x=>x.n).join('・')+(r.pamph?'・パンフレット':''):'パンフレット';
+    let det='';
+    if(o){
+      det=`<div class="hdet">`+r.seats.map(x=>x.lines.map(l=>`<div class="line"><span class="nm">${multi?'席'+x.n+' ':''}${MENU[l.m][0]} ×${l.q}</span><span class="amt">${yen(MENU[l.m][1]*l.q)}</span></div>`).join('')
+        +x.gone.map(m=>`<div class="line z"><span class="nm">${multi?'席'+x.n+' ':''}${MENU[m][0]}</span><span class="amt">取消</span></div>`).join('')).join('')
+        +(r.pamph?`<div class="line"><span class="nm">パンフレット ×${r.pamph}</span><span class="amt">${yen(pamphAmt(r.pamph))}</span></div>`:'')
+        +(r.disc?`<div class="line"><span class="nm">値引き</span><span class="amt">−${yen(r.disc)}</span></div>`:'')
+        +(ui.askId===r.id?`<div class="line act"><span class="nm">取り消しますか</span><button class="danger" data-a="hcancel" data-v="${r.id}">はい</button><button data-a="hno">やめる</button></div>`
+          :`<div class="line act"><button class="danger" data-a="hask" data-v="${r.id}">取り消す</button></div>`)+`</div>`;
+    }
+    return `<div class="hcard"><button class="hbtn ${o?'open':''}" data-a="hopen" data-v="${r.id}"><span class="ht">${r.time}</span><span class="hs">${who}</span><span class="hf">${r.flag?'⚑':''}</span><b class="ha num">${yen(r.total)}円</b></button>${det}</div>`;
+  }).join('');
+  return tool+fcs+rows+(!rs.length&&!un.length?`<div class="note">ありません</div>`:'');
+}
+function salesHTML(){
+  const cnt={};st.H.forEach(r=>{r.seats.forEach(x=>x.lines.forEach(l=>{cnt[l.m]=(cnt[l.m]||0)+l.q;}));if(r.pamph)cnt.p=(cnt.p||0)+r.pamph;});
+  const items=Object.entries(cnt).map(([k,q])=>[k==='p'?'パンフレット':MENU[k][0],q,k==='p'?99:+k]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]);
+  return `<div class="srow"><span>合計</span><b id="sTotal" class="num">${yen(salesTotal())}円</b></div>`
+    +`<div class="srow"><span>会計の件数</span><b id="sCount">${st.H.length}件</b></div>`
+    +`<div class="srow"><span>値引きの合計</span><b id="sDisc" class="num">${yen(st.H.reduce((s,r)=>s+r.disc,0))}円</b></div>`
+    +`<div class="srow h"><span>品ごと</span></div>`
+    +(items.length?items.map(([t,q])=>`<div class="srow it"><span>${t}</span><b>${q}</b></div>`).join(''):`<div class="note">まだありません</div>`);
+}
+function calc(){
+  const c=st.cash,inn=c.moves.filter(m=>m.kind==='in').reduce((s,m)=>s+m.amt,0),out=c.moves.filter(m=>m.kind==='out').reduce((s,m)=>s+m.amt,0);
+  const exp=num(c.start)+salesTotal()+inn-out,has=String(c.counted).trim()!=='';
+  return {exp,has,diff:has?num(c.counted)-exp:0};
+}
+function closeHTML(){
+  const c=st.cash,mv=st.mv,k=calc();
+  return `<div class="fld"><span class="l">はじめの釣り銭</span><input data-f="start" inputmode="numeric" value="${esc(c.start)}" placeholder="0">円</div>`
+    +`<div class="blk"><div class="bh">入金・出金</div>`
+    +c.moves.map(m=>`<div class="line"><span class="nm">${m.kind==='in'?'入金':'出金'}　${esc(m.memo)}</span><span class="amt num">${m.kind==='in'?'+':'−'}${yen(m.amt)}</span></div>`).join('')
+    +`<div class="mvrow"><button class="${mv.kind==='in'?'on':''}" data-a="mvkind" data-v="in">入金</button><button class="${mv.kind==='out'?'on':''}" data-a="mvkind" data-v="out">出金</button>`
+    +`<input data-f="mvAmt" inputmode="numeric" value="${esc(mv.amt)}" placeholder="金額"><input class="memo" data-f="mvMemo" value="${esc(mv.memo)}" placeholder="メモ"><button data-a="mvadd">記録</button></div></div>`
+    +`<div class="fld"><span class="l">数えた現金</span><input data-f="counted" inputmode="numeric" value="${esc(c.counted)}" placeholder="0">円</div>`
+    +`<div class="srow"><span>あるはずの現金</span><b id="cExp" class="num">${yen(k.exp)}円</b></div>`
+    +`<div class="srow"><span>差</span>`+(!k.has?`<b id="cDiff">—</b>`:k.diff===0?`<b id="cDiff">合っています</b>`:`<b id="cDiff" class="num warn">${k.diff>0?'+':'−'}${yen(Math.abs(k.diff))}円</b>`)+`</div>`;
+}
+function soldoutHTML(){
+  return MENU.map((m,i)=>{const o=st.soldOut[i];
+    return `<div class="srow ${o?'so':''}"><span class="s">${m[0]}</span><span class="tag">${o?'売り切れ':''}</span><button class="sob ${o?'on':''}" data-a="so" data-v="${i}">${o?'戻す':'売り切れ'}</button></div>`;}).join('');
+}
+function setHTML(){
+  return `<button class="setbtn" data-a="setting">設定の表を開く</button>`+(ui.setNote?`<div class="note">本番では、メニューや値段を直す表が開きます</div>`:'');
+}
+function contentHTML(t){return {hist:histHTML,sales:salesHTML,close:closeHTML,soldout:soldoutHTML,set:setHTML}[t]();}
+function modalHTML(){
+  if(ui.help)return helpHTML('reg');if(!ui.modal)return '';
+  return `<div class="ov"><div class="win"><div class="whead"><b>メニュー</b><button data-a="mclose">✕</button></div><div class="wbody"><div class="wlist">`
+    +TABS.map(([k,t])=>`<button class="${ui.mtab===k?'on':''}" data-a="mtab" data-v="${k}">${t}</button>`).join('')
+    +`</div><div class="wcont" data-sc="m-${ui.mtab}">${contentHTML(ui.mtab)}</div></div></div></div>`;
+}
+function headerHTML(){
+  const u=unpaidSeats(),f=flagCount();
+  const band=ui.resetAsk?`<div class="cband"><span>未会計 ${u.length}席 ${yen(u.reduce((s,n)=>s+sub(n),0))}円</span><button class="danger" data-a="resetgo">空に戻す</button><button data-a="resetno">やめる</button></div>`:'';
+  return `<div class="hwrap"><div class="hdr">${swHTML()}<span class="t">レジ</span><span class="sum">未会計 ${u.length}席 ${yen(u.reduce((s,n)=>s+sub(n),0))}円</span>`
+    +`<button class="fbtn ${f?'':'off'}" data-a="flagsopen" ${f?'':'disabled'}>⚑ ${f}</button><span class="sp"></span>`
+    +`<button data-a="resetask">全席を空に戻す</button><button data-a="mopen">メニュー</button>${helpBtn()}</div>${band}</div>`;
+}
+function render(){
+  const root=document.getElementById('v-reg'),t=document.createElement('div');
+  t.innerHTML=headerHTML()+`<main>${mapPane()}${payPane()}</main>`+modalHTML();
+  morph(root,t);
+}
+const A={
+  seat(n){
+    const s=st.S[n];
+    if(ui.moving){
+      if(s.st!=='empty')return;const from=ui.moving,sn=snap();
+      moveSeat(from,n);
+      
+      ui.moving=null;setToast(`席 ${from} → ${n} に移しました`,sn);return;
+    }
+    if(s.st!=='unpaid'){ui.hint=true;clearTimeout(hintTimer);hintTimer=setTimeout(()=>{ui.hint=false;render();},2500);return;}
+    ui.hint=false;st.disc=0;ui.discOpen=false;
+    st.sel=st.sel.includes(n)?st.sel.filter(x=>x!==n):[...st.sel,n];
+  },
+  clearsel(){st.sel=[];st.disc=0;ui.discOpen=false;ui.hint=false;},
+  pq(v){st.pamph=Math.max(0,st.pamph+(+v));},
+  discopen(){ui.discOpen=!ui.discOpen;},
+  disc(v){st.disc=+v;ui.discOpen=false;},
+  q(v){const [id,d]=v.split(':').map(Number),l=findLine(id);if(!l)return;setQty(l,d);},
+  flag(n){if(st.flags[n])delete st.flags[n];else st.flags[n]=true;},
+  pay(){
+    if(!(st.sel.length||st.pamph>0)||ui.moving||ui.view!=='pay')return;
+    const sn=snap(),seats=selList(),d=discAmt(),fs=seats.filter(n=>st.flags[n]);
+    const rec={id:st.nid++,time:hhmm(new Date()),
+      seats:seats.map(n=>({n,lines:st.S[n].lines.filter(l=>l.q>0).map(l=>({m:l.m,q:l.q})),gone:st.S[n].lines.filter(l=>l.q===0).map(l=>l.m)})),
+      disc:d,pamph:st.pamph,total:totalNow(),flag:fs.length>0,fs};
+    st.H.unshift(rec);
+    seats.forEach(n=>{st.S[n]={st:'empty',lines:[]};delete st.flags[n];delete st.calls[n];});
+    const pn=st.pamph;st.sel=[];st.disc=0;st.pamph=0;ui.discOpen=false;ui.hint=false;
+    setToast(seats.length?`席 ${seats.join('・')} を会計しました`:`パンフレット ${pn} を会計しました`,sn);
+  },
+  undo(){
+    if(!toast)return;const d=JSON.parse(toast.s);DATA.forEach(k=>st[k]=d[k]);
+    toast=null;clearTimeout(toastTimer);ui.view='pay';ui.addSeat=null;ui.addQ={};ui.moving=null;ui.discOpen=false;ui.openId=null;ui.askId=null;
+  },
+  addopen(n){ui.view='add';ui.addSeat=n;ui.addQ={};ui.discOpen=false;},
+  aq(v){const [i,d]=v.split(':').map(Number);if(st.soldOut[i])return;ui.addQ[i]=Math.max(0,(ui.addQ[i]||0)+d);},
+  adddo(){
+    const n=ui.addSeat,sn=snap();
+    Object.entries(ui.addQ).filter(([,q])=>q>0).forEach(([m,q])=>{addOrder(n,+m,q);});
+    ui.view='pay';ui.addSeat=null;ui.addQ={};setToast('足しました',sn);
+  },
+  vcancel(){ui.view='pay';ui.addSeat=null;ui.addQ={};},
+  moveopen(n){ui.moving=n;ui.discOpen=false;},
+  movecancel(){ui.moving=null;},
+  resetask(){ui.resetAsk=true;},
+  resetno(){ui.resetAsk=false;},
+  resetgo(){
+    const sn=snap();SEATS.forEach(n=>{st.S[n]={st:'empty',lines:[]};});
+    st.sel=[];st.flags={};st.calls={};st.disc=0;st.pamph=0;ui.resetAsk=false;ui.discOpen=false;ui.moving=null;ui.view='pay';
+    setToast('全席を空に戻しました',sn);
+  },
+  // メニューの窓
+  mopen(){ui.modal=true;ui.resetAsk=false;ui.discOpen=false;},
+  mclose(){ui.modal=false;},
+  mtab(v){ui.mtab=v;},
+  flagsopen(){ui.modal=true;ui.mtab='hist';ui.histFlag=true;ui.openId=null;ui.askId=null;},
+  histflag(){ui.histFlag=!ui.histFlag;},
+  hopen(v){ui.openId=ui.openId===+v?null:+v;ui.askId=null;},
+  hask(v){ui.askId=+v;},
+  hno(){ui.askId=null;},
+  hcancel(v){
+    const r=st.H.find(x=>x.id===+v);if(!r)return;
+    st.H.splice(st.H.indexOf(r),1);
+    r.seats.forEach(x=>{
+      const ls=[...x.lines.map(l=>({m:l.m,q:l.q})),...x.gone.map(m=>({m,q:0}))];
+      restoreLines(x.n,ls);
+      
+    });
+    (r.fs||[]).forEach(n=>{st.flags[n]=true;});
+    ui.openId=null;ui.askId=null;
+  },
+  mvkind(v){st.mv.kind=v;},
+  mvadd(){const a=num(st.mv.amt);if(!a)return;st.cash.moves.push({kind:st.mv.kind,amt:a,memo:st.mv.memo.trim()});st.mv.amt='';st.mv.memo='';},
+  so(v){if(st.soldOut[v])delete st.soldOut[v];else st.soldOut[v]=true;},
+  setting(){ui.setNote=true;},
+  help(){ui.help=true;ui.discOpen=false;ui.resetAsk=false;},
+  hclose(){ui.help=false;},
+};
+document.addEventListener('input',e=>{
+  const f=e.target.dataset.f;if(!f)return;
+  if(f==='start')st.cash.start=e.target.value;else if(f==='counted')st.cash.counted=e.target.value;
+  else if(f==='mvAmt')st.mv.amt=e.target.value;else if(f==='mvMemo')st.mv.memo=e.target.value;
+  render();
+});
+const pre=e=>{
+  if(ui.discOpen&&!e.target.closest('.drow'))ui.discOpen=false;
+  const ov=e.target.closest('.ov');
+  if(ov&&e.target===ov){ui.modal=false;ui.help=false;render();return true;}
+};
+return {render,A,pre};
+})();
+SC.wai=(()=>{
+const wu={view:'list',mode:'item',sel:null,pick:null,addQ:{},moving:null,ask:false,help:false};
+let lastKey='';
+const nm=l=>MENU[l.m][0];
+const total=n=>linesSum(st.S[n].lines);
+const hasOrder=n=>st.S[n].lines.some(l=>l.q>0);
+const callSeats=()=>SEATS.filter(n=>st.calls[n]);
+const waitMin=l=>Math.max(0,Math.floor((Date.now()-l.mt)/MIN));
+const isNew=l=>Date.now()-l.mt<1800;
+function readyGroups(){
+  const m={};rdyLines().forEach(o=>{(m[o.n]=m[o.n]||[]).push(o.l);});
+  return Object.entries(m).map(([n,ls])=>({n,ls})).sort((a,b)=>a.ls[0].mt-b.ls[0].mt);
+}
+function pickSeat(){
+  const p=wu.pick;if(!p)return null;
+  if(p[0]==='i'){const o=lineOf(+p.slice(1));return o&&o.l.q>0&&o.l.made>o.l.sent?o.n:null;}
+  const n=p.slice(1);if(p[0]==='s')return readyGroups().some(g=>g.n===n)?n:null;
+  return st.calls[n]?n:null;
+}
+function seatBtn(n){
+  const s=st.S[n],ls=s.lines;let cls;
+  const rdy=ls.some(l=>l.q>0&&l.made>l.sent),mkg=ls.some(l=>l.q>l.made),call=st.calls[n];
+  if(s.st==='empty'&&!ls.length)cls='empty';else if(rdy)cls='rdy';else if(mkg)cls='mkg';else cls='seated';
+  if(call)cls+=' call';
+  const hl=wu.view==='list'?pickSeat()===n:wu.sel===n;
+  if(hl)cls+=' pk';
+  let dis='';
+  if(wu.moving){if(s.st==='empty'&&!ls.length)cls+=' tgt';else{cls+=' dim';dis='disabled';}}
+  return `<button class="seat ${cls}" data-a="seat" data-v="${n}" ${dis}>${n}${call&&rdy?'<i>●</i>':''}</button>`;
+}
+function mapPane(){
+  const top=wu.moving?`<div class="mvbar"><span>移す先の空いている席を押してください</span><button data-a="movecancel">やめる</button></div>`
+    :`<div class="edge"><span></span><b>前（ショー）</b><span>ドア</span></div>`;
+  return `<section class="mapwrap"><div class="maptop">${top}</div><div class="map">`
+    +ROOM.blocks.map(([n,c,r,sp])=>`<div class="kitchen" style="grid-column:${c};grid-row:${r} / span ${sp}">${n}</div>`).join('')
+    +TB.map(t=>`<div class="table" style="--c:${t.c};--r:${t.r}"><div class="seats">${t.seats.map(seatBtn).join('')}</div></div>`).join('')
+    +`</div><div class="edge2"><span>ドア</span></div></section>`;
+}
+function listBody(){
+  const calls=callSeats(),pk=wu.pick;
+  let h=calls.map(n=>`<div class="row call ${pk==='c'+n?'pk':''}" data-a="pick" data-v="c${n}"><span class="sn"><small>席</small>${n}</span><span class="nm">呼び出し</span><button class="dl danger" data-a="went" data-v="${n}">行った</button></div>`).join('');
+  if(wu.mode==='item'){
+    const rl=rdyLines();
+    h+=rl.map(({n,l})=>{const u=l.made-l.sent;
+      return `<div class="row ${pk==='i'+l.id?'pk':''} ${isNew(l)?'new':''}" data-a="pick" data-v="i${l.id}"><span class="sn"><small>席</small>${n}</span><span class="nm">${nm(l)}${u>1?' ×'+u:''}</span><span class="mn num">${waitMin(l)}分</span><button class="on dl" data-a="dl" data-v="${l.id}">持ってった</button></div>`;}).join('');
+    if(!rl.length)h+=`<div class="note">持っていく物はありません</div>`;
+  }else{
+    const gs=readyGroups();
+    h+=gs.map(g=>{const open=pk==='s'+g.n,nw=g.ls.some(isNew);
+      return `<div class="row grp ${open?'pk':''} ${nw?'new':''}" data-a="pick" data-v="s${g.n}"><span class="sn"><small>席</small>${g.n}</span><div class="gl">`
+        +g.ls.map(l=>{const u=l.made-l.sent;return `<div class="gi"><span>${nm(l)}${u>1?' ×'+u:''}</span>${open?`<span class="mn num">${waitMin(l)}分</span><button data-a="dl" data-v="${l.id}">持ってった</button>`:''}</div>`;}).join('')
+        +`</div><button class="on dl" data-a="dlseat" data-v="${g.n}">持ってった</button></div>`;}).join('');
+    if(!gs.length)h+=`<div class="note">持っていく物はありません</div>`;
+  }
+  return h;
+}
+const stp=(l,lock)=>`<span class="stp"><button data-a="q" data-v="${l.id}:-1" ${l.q>0&&!lock?'':'disabled'}>−</button><b class="q">${l.q}</b><button data-a="q" data-v="${l.id}:1" ${lock?'disabled':''}>＋</button></span>`;
+function seatTop(){
+  const n=wu.sel,s=st.S[n],lock=!!wu.moving,has=s.lines.length>0,emp=s.st==='empty'&&!has;
+  return `<div class="seattop"><div class="stat"><button class="${emp?'':'on'}" data-a="sit" ${lock||has?'disabled':''}>着席</button><span class="tot num">合計 ${yen(total(n))}円</span></div>`
+    +`<div class="hd"><span class="hn">注文</span><button data-a="addopen" ${lock?'disabled':''}>足す</button><button data-a="moveopen" ${emp||lock?'disabled':''}>移す</button><button class="danger" data-a="emptyseat" ${emp||lock?'disabled':''}>空に</button></div>`
+    +(wu.ask&&!lock?`<div class="ask"><span>会計がまだです。空に戻しますか</span><button class="danger" data-a="emptygo">はい</button><button data-a="askno">やめる</button></div>`:'')+`</div>`;
+}
+const mcls=(v,q)=>q>0&&v>=q?'on':(v>0?'part':'');
+function markBtns(l,lock){
+  const dis=lock||l.q===0?'disabled':'';
+  return `<button class="${mcls(l.made,l.q)}" data-a="mkmade" data-v="${l.id}" ${dis}>作った${l.made>0&&l.made<l.q?' '+l.made+'/'+l.q:''}</button>`
+    +`<button class="${mcls(l.sent,l.q)}" data-a="mksent" data-v="${l.id}" ${dis}>持ってった${l.sent>0&&l.sent<l.q?' '+l.sent+'/'+l.q:''}</button>`;
+}
+function seatBody(){
+  const n=wu.sel,s=st.S[n],lock=!!wu.moving;
+  if(!s.lines.length)return `<div class="note">注文はありません</div>`;
+  return s.lines.map(l=>`<div class="line ${l.q?'':'z'}"><span class="nm">${nm(l)}</span>${stp(l,lock)}<div class="mk">${markBtns(l,lock)}</div></div>`).join('');
+}
+function addBody(){
+  return MENU.map((m,i)=>{const so=st.soldOut[i],q=wu.addQ[i]||0;
+    return `<div class="ar ${so?'so':''}"><span class="nm">${m[0]}${so?'<em>売り切れ</em>':''}</span><span class="p num">${m[1]}</span><span class="stp"><button data-a="aq" data-v="${i}:-1" ${so||!q?'disabled':''}>−</button><b>${q}</b><button data-a="aq" data-v="${i}:1" ${so?'disabled':''}>＋</button></span></div>`;}).join('');
+}
+function payPane(){
+  const v=wu.view,lock=!!wu.moving;let bar,top='',body,foot='';
+  if(v==='list'){
+    bar=`<button class="seg ${wu.mode==='item'?'on':''}" data-a="mode" data-v="item">品ごと</button><button class="seg ${wu.mode==='seat'?'on':''}" data-a="mode" data-v="seat">席ごと</button><span class="smp">見本用</span>`;
+    body=listBody();
+  }else if(v==='seat'){
+    bar=`<b>席 ${wu.sel}${st.calls[wu.sel]?'<em>呼び出し中</em>':''}</b><button data-a="close" ${lock?'disabled':''}>✕</button>`;
+    top=seatTop();body=seatBody();
+  }else{
+    const any=Object.values(wu.addQ).some(q=>q>0);
+    bar=`<b>席 ${wu.sel} に足す</b><button data-a="vcancel">やめる</button>`;
+    body=addBody();foot=`<div class="foot"><button class="main" data-a="adddo" ${any?'':'disabled'}>注文する</button></div>`;
+  }
+  const tst=toast?`<div class="toast"><span>${toast.msg}</span><button data-a="undo">元に戻す</button></div>`:'';
+  return `<section class="pay"><div class="selbar">${bar}</div>${top}<div class="body">${body}</div>${foot}${tst}</section>`;
+}
+function headerHTML(){
+  const nc=callSeats().length,u=rdyLines().reduce((s,o)=>s+o.l.made-o.l.sent,0);
+  return `<div class="hwrap"><div class="hdr">${swHTML()}<span class="t">ウェイター</span><b class="cnt">持っていく ${u}</b><span class="sp"></span>`
+    +`<span class="chip ${nc?'':'off'}">呼び出し ${nc}</span>${helpBtn()}</div></div>`;
+}
+function render(){
+  if(wu.pick&&!pickSeat())wu.pick=null;
+  const root=document.getElementById('v-wai'),t=document.createElement('div');
+  t.innerHTML=headerHTML()+`<main>${mapPane()}${payPane()}</main>`+(wu.help?helpHTML('wai'):'');
+  morph(root,t);
+  const key=wu.view+':'+wu.sel+':'+wu.mode;
+  if(key!==lastKey){lastKey=key;const b=root.querySelector('.body');if(b)b.scrollTop=0;}
+}
+function doEmpty(n){
+  const sn=snap(),nav={view:'seat',sel:n};
+  st.S[n]={st:'empty',lines:[]};delete st.calls[n];delete st.flags[n];st.sel=st.sel.filter(x=>x!==n);
+  wu.view='list';wu.sel=null;wu.ask=false;wu.pick=null;
+  setToast(`席 ${n} を空にしました`,sn,nav);
+}
+const nav0=()=>({view:wu.view,sel:wu.sel});
+const A={
+  mode(v){wu.mode=v;wu.pick=null;},
+  pick(v){wu.pick=wu.pick===v?null:v;},
+  went(n){const sn=snap();delete st.calls[n];setToast(`席 ${n} に行きました`,sn,nav0());},
+  dl(id){
+    const o=lineOf(+id);if(!o||o.l.made<=o.l.sent)return;
+    const sn=snap(),nav=nav0();o.l.sent=o.l.made;
+    setToast(`席 ${o.n} ${nm(o.l)} を持っていきました`,sn,nav);
+  },
+  dlseat(n){
+    const ls=st.S[n].lines.filter(l=>l.q>0&&l.made>l.sent);if(!ls.length)return;
+    const sn=snap(),nav=nav0();ls.forEach(l=>{l.sent=l.made;});
+    setToast(ls.length>1?`席 ${n} の ${ls.length}品 を持っていきました`:`席 ${n} ${nm(ls[0])} を持っていきました`,sn,nav);
+  },
+  mkmade(id){
+    const o=lineOf(+id);if(!o)return;const sn=snap(),nav=nav0(),was=o.l.made>=o.l.q;
+    toggleMade(o.l);
+    setToast(was?`席 ${o.n} ${nm(o.l)} の「作った」を外しました`:`席 ${o.n} ${nm(o.l)} を作りました`,sn,nav);
+  },
+  mksent(id){
+    const o=lineOf(+id);if(!o)return;const sn=snap(),nav=nav0(),was=o.l.sent>=o.l.q;
+    toggleSent(o.l);
+    setToast(was?`席 ${o.n} ${nm(o.l)} の「持ってった」を外しました`:`席 ${o.n} ${nm(o.l)} を持っていきました`,sn,nav);
+  },
+  seat(n){
+    if(wu.moving){
+      const s=st.S[n];if(s.st!=='empty'||s.lines.length)return;
+      const from=wu.moving,sn=snap(),nav={view:'seat',sel:from};
+      moveSeat(from,n);wu.moving=null;wu.sel=n;wu.view='seat';
+      setToast(`席 ${from} → ${n} に移しました`,sn,nav);return;
+    }
+    if(wu.view!=='list'&&wu.sel===n){wu.view='list';wu.sel=null;}
+    else{wu.view='seat';wu.sel=n;}
+    wu.ask=false;wu.addQ={};wu.pick=null;
+  },
+  close(){wu.view='list';wu.sel=null;wu.ask=false;},
+  sit(){const s=st.S[wu.sel];if(s.lines.length)return;s.st=s.st==='empty'?'seated':'empty';},
+  q(v){const [id,d]=v.split(':').map(Number),l=findLine(id);if(!l)return;setQty(l,d);},
+  addopen(){wu.view='add';wu.addQ={};wu.ask=false;},
+  aq(v){const [i,d]=v.split(':').map(Number);if(st.soldOut[i])return;wu.addQ[i]=Math.max(0,(wu.addQ[i]||0)+d);},
+  adddo(){
+    const n=wu.sel,sn=snap(),nav={view:'seat',sel:n};let c=0;
+    Object.entries(wu.addQ).filter(([,q])=>q>0).forEach(([m,q])=>{c++;addOrder(n,+m,q);});
+    if(!c)return;
+    wu.view='seat';wu.addQ={};
+    setToast('注文を入れました',sn,nav);
+  },
+  vcancel(){wu.view='seat';wu.addQ={};},
+  moveopen(){wu.moving=wu.sel;wu.ask=false;},
+  movecancel(){wu.moving=null;},
+  emptyseat(){if(hasOrder(wu.sel))wu.ask=true;else doEmpty(wu.sel);},
+  emptygo(){doEmpty(wu.sel);},
+  askno(){wu.ask=false;},
+  help(){wu.help=true;},
+  hclose(){wu.help=false;},
+  undo(){
+    if(!toast)return;const d=JSON.parse(toast.s),nav=toast.nav||nav0();restore(d);
+    clearToast();wu.view=nav.view;wu.sel=nav.sel;wu.pick=null;wu.addQ={};wu.moving=null;wu.ask=false;
+  },
+};
+const pre=e=>{const ov=e.target.closest('.ov');if(ov&&e.target===ov){wu.help=false;render();return true;}};
+return {render,A,pre};
+})();
+SC.kit=(()=>{
+const ku={W:2,stn:-1,so:false,help:false,kp:new Set()};
+let layout=[];const kmask={},timers={};
+const WS=[[0,"来た順"],[2,"2分"],[5,"5分"],[Infinity,"全部"]];
+const GONE_MS=1500;
+
+/* 作る順を出す決まり
+ *  1. まだ作っていない行を、時刻の古い順に並べる
+ *  2. いちばん古い行 L を取り、L と同じ品で L の時刻から W 分以内の行を全部まとめて1かたまり
+ *  3. 残りで 2 を繰り返す
+ *  4. かたまりは、中でいちばん古い行の時刻順に上から並べる
+ * W=0 なら同じ時刻の同じ品だけ（実質、来た順）。W=Infinity なら品ごとに1つ。 */
+function buildGroups(todo,W){
+  let rest=todo.slice().sort((a,b)=>a.at-b.at||a.id-b.id);
+  const out=[];
+  while(rest.length){
+    const L=rest[0],g=[],keep=[];
+    for(const r of rest){if(r.item===L.item&&r.at-L.at<=W*MIN)g.push(r);else keep.push(r);}
+    out.push(g);rest=keep;
+  }
+  return out.sort((a,b)=>a[0].at-b[0].at||a[0].id-b[0].id);
+}
+const inStn=l=>ku.stn<0||MENU[l.m][2]===ku.stn;
+const row=l=>({id:l.id,at:l.ot,item:l.m});
+function regroup(){
+  const all=allLines();
+  const groups=buildGroups(all.filter(o=>o.l.made<o.l.q&&inStn(o.l)).map(o=>row(o.l)),ku.W);
+  // 札を押して全部済んだ行は、同じ品のかたまりへ戻して薄く残す
+  all.filter(o=>ku.kp.has(o.l.id)&&o.l.made>=o.l.q&&o.l.q>o.l.sent&&inStn(o.l)).forEach(o=>{
+    const d=row(o.l);let best=null,bd=Infinity;
+    groups.forEach(g=>{if(g[0].item!==d.item)return;const x=Math.abs(g[0].at-d.at);if(x<bd){bd=x;best=g;}});
+    if(best)best.push(d);else groups.push([d]);
+  });
+  groups.forEach(g=>g.sort((a,b)=>a.at-b.at||a.id-b.id));
+  const key=g=>{const u=g.filter(r=>{const l=findLine(r.id);return l.made<l.q;});return (u.length?u:g)[0].at;};
+  groups.sort((a,b)=>key(a)-key(b)||a[0].id-b[0].id);
+  layout=groups.map(g=>g.map(r=>r.id));
+}
+function ensureLayout(){
+  const have=new Set(layout.flat());
+  if(allLines().some(o=>o.l.made<o.l.q&&inStn(o.l)&&!have.has(o.l.id)))regroup();
+}
+// 1かたまりの札：行ごとに「まだ持っていっていない数」ぶん。そのうち「作った」の数が済んだ札
+function groupInfo(ids){
+  const ls=ids.map(findLine).filter(l=>l&&l.q>l.sent).sort((a,b)=>a.ot-b.ot||a.id-b.id);
+  const toks=[];ls.forEach(l=>{for(let i=0;i<l.q-l.sent;i++)toks.push(l);});
+  return {ls,toks,D:ls.reduce((s,l)=>s+l.made-l.sent,0)};
+}
+function mask(key,T,D){
+  let m=kmask[key];if(!m)m=kmask[key]=new Set();
+  [...m].forEach(x=>{if(x>=T)m.delete(x);});
+  while(m.size>D)m.delete(Math.max(...m));
+  for(let i=0;m.size<D&&i<T;i++)if(!m.has(i))m.add(i);
+  return m;
+}
+// 札が全部済んだかたまりは1.5秒後に消す（その間は戻せる）。消えるときに並べ直す
+function armTimers(){
+  layout.forEach(ids=>{
+    const ls=ids.map(findLine).filter(l=>l&&l.q>l.sent),k=ids.join(',');
+    if(ls.length&&ls.every(l=>l.made>=l.q)){
+      if(!timers[k])timers[k]=setTimeout(()=>{
+        delete timers[k];
+        const cur=layout.find(x=>x.join(',')===k);if(!cur)return;
+        const l2=cur.map(findLine).filter(l=>l&&l.q>l.sent);
+        if(l2.length&&!l2.every(l=>l.made>=l.q))return;
+        cur.forEach(id=>ku.kp.delete(id));delete kmask[cur[0]];regroup();
+        if(screen==='kit')render();
+      },GONE_MS);
+    }else if(timers[k]){clearTimeout(timers[k]);delete timers[k];}
+  });
+}
+function listHTML(){
+  const gs=layout.map(ids=>({ids,...groupInfo(ids)})).filter(g=>g.toks.length);
+  if(!gs.length)return `<div class="empty">注文はありません</div>`;
+  const now=Date.now();
+  return gs.map((g,gi)=>{
+    const key=g.ids[0],m=mask(key,g.toks.length,g.D),first=g.ls[0];
+    const so=st.soldOut[first.m]&&g.D<g.toks.length;
+    return `<div class="grp ${gi===0?'first':''}" data-g="${key}"><div class="gh"><span class="gname">${MENU[first.m][0]}</span>${so?'<em>売り切れ</em>':''}</div><div class="toks">`
+      +g.toks.map((l,i)=>{const dn=m.has(i),late=!dn&&now-l.ot>=10*MIN,fr=!dn&&l.fresh>now;
+        return `<button class="tok ${dn?'done':''} ${late?'late':''} ${fr?'fresh':''}" data-a="tok" data-v="${key}:${i}" aria-label="作った">${dn?'✓':''}</button>`;}).join('')+`</div></div>`;
+  }).join('');
+}
+function sideHTML(){
+  const rl=rdyLines();
+  return `<h3>持っていく物</h3><div class="prs">`+(rl.length?rl.map(({n,l})=>{const u=l.made-l.sent;
+    return `<div class="pr"><span class="pn">${MENU[l.m][0]}${u>1?' ×'+u:''}</span><b class="ps">席 ${n}</b><button class="on" data-a="dlv" data-v="${l.id}">持ってった</button></div>`;}).join(''):`<div class="note">ありません</div>`)+`</div>`;
+}
+function soHTML(){
+  return MENU.map((m,i)=>{const o=st.soldOut[i];
+    return `<div class="srow ${o?'so':''}"><span class="s">${m[0]}</span><span class="tag">${o?'売り切れ':''}</span><button class="sob ${o?'on':''}" data-a="so" data-v="${i}">${o?'戻す':'売り切れ'}</button></div>`;}).join('');
+}
+function render(){
+  ensureLayout();armTimers();
+  const root=document.getElementById('v-kit'),t=document.createElement('div');
+  const stnBtns=[[-1,"全部"],...CATN.map((c,i)=>[i,c])].map(([k,n])=>`<button class="${ku.stn===k?'on':''}" data-a="stn" data-v="${k}">${n}</button>`).join('');
+  t.innerHTML=`<div class="hdr">${swHTML()}<span class="t">キッチン</span><span class="sp"></span>`
+    +`<span class="wgrp"><small>見本用</small>${WS.map(([w,n])=>`<button class="${ku.W===w?'on':''}" data-a="w" data-v="${w}">${n}</button>`).join('')}</span>`
+    +`<button class="so-btn" data-a="sopen">売り切れ</button>${helpBtn()}</div>`
+    +`<div class="stn">${stnBtns}</div>`
+    +`<main><div class="lw"><div class="list">${listHTML()}</div>`
+    +(toast?`<div class="toast"><span>${toast.msg}</span><button data-a="undo">元に戻す</button></div>`:'')
+    +`</div><aside class="side">${sideHTML()}</aside></main>`
+    +(ku.help?helpHTML('kit'):ku.so?`<div class="ov"><div class="win"><div class="whead"><b>売り切れ</b><button data-a="mclose">✕</button></div><div class="wcont">${soHTML()}</div></div></div>`:'');
+  morph(root,t);
+}
+const A={
+  tok(v){
+    const [key,ix]=v.split(':').map(Number),ids=layout.find(x=>x[0]===key);if(!ids)return;
+    const g=groupInfo(ids),m=mask(key,g.toks.length,g.D),sn=snap();
+    if(!m.has(ix)){
+      const l=g.ls.find(x=>x.made<x.q);if(!l)return;
+      l.made++;l.mt=Date.now();m.add(ix);ku.kp.add(l.id);
+      setToast(`${MENU[l.m][0]} を作りました`,sn,null,()=>m.delete(ix));
+    }else{
+      const l=[...g.ls].reverse().find(x=>x.made>x.sent);if(!l)return;
+      l.made--;m.delete(ix);
+      setToast(`${MENU[l.m][0]} を戻しました`,sn,null,()=>m.add(ix));
+    }
+  },
+  dlv(id){
+    const o=lineOf(+id);if(!o||o.l.made<=o.l.sent)return;const sn=snap();o.l.sent=o.l.made;
+    setToast(`席 ${o.n} ${MENU[o.l.m][0]} を持っていきました`,sn);
+  },
+  undo(){if(!toast)return;const d=JSON.parse(toast.s),a=toast.after;restore(d);clearToast();if(a)a();},
+  w(v){ku.W=+v;regroup();},
+  stn(v){ku.stn=+v;regroup();},
+  sopen(){ku.so=true;},
+  mclose(){ku.so=false;},
+  so(v){if(st.soldOut[v])delete st.soldOut[v];else st.soldOut[v]=true;},
+  help(){ku.help=true;},
+  hclose(){ku.help=false;},
+};
+const pre=e=>{const ov=e.target.closest('.ov');if(ov&&e.target===ov){ku.so=false;ku.help=false;render();return true;}};
+return {render,A,pre,enter:regroup};
+})();
+
+SC.reg.A=SC.reg.A;
+function go(v){
+  if(v===screen)return;
+  clearToast();screen=v;
+  Object.keys(SC).forEach(k=>{document.getElementById('v-'+k).hidden=k!==screen;});
+  if(SC[v].enter)SC[v].enter();
+  render();
+}
+document.addEventListener('click',e=>{
+  const sc=e.target.closest('.scr');if(!sc)return;
+  const S=SC[sc.dataset.scr];
+  if(S.pre&&S.pre(e))return;
+  const b=e.target.closest('[data-a]');
+  if(!b||b.disabled){render();return;}
+  const a=b.dataset.a;
+  if(a==='go')go(b.dataset.v);else S.A[a](b.dataset.v);
+  render();setTimeout(render,1900);
+});
+// 見本用：10秒ごとに新しい注文の行が1つ入る（合計8行まで）。取り消しの表示中は待つ
+setInterval(()=>{const now=Date.now();if(!toast&&added<8&&now>=nextTick){tick();nextTick=now+10000;render();}},500);
+setInterval(()=>{if(screen!=='reg')render();},5000);
+seed();
+SC.kit.enter();
+Object.keys(SC).forEach(k=>{document.getElementById('v-'+k).hidden=k!==screen;});
+render();
+
+</script>
+</body>
+</html>
