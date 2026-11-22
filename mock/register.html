@@ -117,6 +117,13 @@ main{flex:1;min-height:0;display:grid;grid-template-columns:6fr 4fr}
 .hdet{padding:0 4px 8px}
 .hdet .line{min-height:34px}
 .hdet .line.act{border-bottom:0;justify-content:flex-end}
+.hdet .line.tot{border-bottom:0;font-weight:700;justify-content:space-between}
+.hdet .orig{text-align:right;font-size:12px;color:#777;margin:-2px 0 4px}
+.hdet .line.act{margin-top:22px;padding-top:12px;border-top:1px solid #e3e3e3}
+.hdet .dopts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;padding:4px 0 6px}
+.hdet .dopts button{min-height:38px}
+.hdet .dbtn2{min-width:120px;font-weight:700}
+.fix{flex:none;font-size:11px;line-height:1.2;padding:2px 5px;border:1px solid #1d5fb8;color:#1d5fb8;border-radius:5px;background:#fff;white-space:nowrap}
 .fcard{display:flex;gap:8px;align-items:baseline;padding:9px 0;border-bottom:1px solid #f0f0f0}
 .fcard b{flex:1}
 .fcard span{color:#555}
@@ -215,9 +222,9 @@ function seed(){
     });
   });
   const now=Date.now();
-  const mk=(min,n,ls,d,flag)=>{const L=ls.map(([m,q])=>({m,q}));return {id:st.nid++,time:hhmm(new Date(now-min*60000)),seats:[{n,lines:L,gone:[]}],disc:d,pamph:0,total:Math.max(0,linesSum(L)-d),flag,fs:flag?[n]:[]};};
+  const mk=(min,n,ls,d,flag)=>{const L=ls.map(([m,q])=>({m,q}));return mkRec({id:st.nid++,time:hhmm(new Date(now-min*60000)),seats:[{n,lines:L}],di:d===300?2:0,pamph:0,flag,fs:flag?[n]:[]});};
   st.H=[mk(7,"40",[[4,1],[11,1]],0,false),mk(19,"18",[[12,1],[0,1]],0,true),mk(33,"27",[[1,2],[13,1]],300,false),mk(48,"55",[[5,1],[14,1]],0,false),mk(62,"4",[[2,1],[9,1],[12,1]],0,false)];
-  ui={view:'pay',addSeat:null,addQ:{},moving:null,discOpen:false,modal:false,mtab:'hist',histFlag:false,openId:null,askId:null,resetAsk:false,setNote:false,hint:false};
+  ui={view:'pay',addSeat:null,addQ:{},moving:null,discOpen:false,modal:false,mtab:'hist',histFlag:false,openId:null,askId:null,hdiscId:null,resetAsk:false,setNote:false,hint:false};
 }
 const snap=()=>JSON.stringify(DATA.reduce((o,k)=>(o[k]=st[k],o),{}));
 function setToast(msg,s){toast={msg,s};clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast=null;render();},4500);}
@@ -229,6 +236,11 @@ const flagCount=()=>unpaidSeats().filter(n=>st.flags[n]).length;
 const seatsSum=()=>st.sel.reduce((s,n)=>s+sub(n),0);
 const discAmt=()=>Math.min(DISCS[st.disc][1],seatsSum());
 const totalNow=()=>seatsSum()-discAmt()+pamphAmt(st.pamph);
+const rKey=r=>JSON.stringify([r.seats.map(x=>[x.n,x.lines.map(l=>[l.m,l.q]).sort((a,b)=>a[0]-b[0])]),r.pamph,r.di]);
+const rSum=r=>r.seats.reduce((s,x)=>s+linesSum(x.lines),0);
+function rCalc(r){const s=rSum(r);r.disc=Math.min(DISCS[r.di][1],s);r.total=s-r.disc+pamphAmt(r.pamph);}
+function mkRec(r){rCalc(r);r.o={k:rKey(r),t:r.total};return r;}
+const edited=r=>rKey(r)!==r.o.k;
 const salesTotal=()=>st.H.reduce((s,r)=>s+r.total,0);
 function findLine(id){for(const n in st.S){const l=st.S[n].lines.find(x=>x.id===id);if(l)return l;}return null;}
 function addLines(dst,src){src.forEach(l=>{const f=dst.find(x=>x.m===l.m);if(f)f.q+=l.q;else dst.push({id:st.nid++,m:l.m,q:l.q});});}
@@ -262,6 +274,7 @@ function mapPane(){
     +TB.map(t=>`<div class="table" style="--c:${t.c};--r:${t.r}"><div class="seats">${t.seats.map(seatBtn).join('')}</div></div>`).join('')
     +`</div><div class="edge2"><span>ドア</span></div></section>`;
 }
+const stpH=(a,k,q)=>`<span class="stp"><button data-a="${a}" data-v="${k}:-1" ${q>0?'':'disabled'}>−</button><b class="q">${q}</b><button data-a="${a}" data-v="${k}:1">＋</button></span>`;
 const stp=l=>`<span class="stp"><button data-a="q" data-v="${l.id}:-1" ${l.q>0?'':'disabled'}>−</button><b class="q">${l.q}</b><button data-a="q" data-v="${l.id}:1">＋</button></span>`;
 function cardsHTML(){
   const lock=ui.moving?'disabled':'';
@@ -305,19 +318,22 @@ function histHTML(){
     const who=r.seats.length?'席 '+r.seats.map(x=>x.n).join('・')+(r.pamph?'・パンフレット':''):'パンフレット';
     let det='';
     if(o){
-      det=`<div class="hdet">`+r.seats.map(x=>x.lines.map(l=>`<div class="line"><span class="nm">${multi?'席'+x.n+' ':''}${MENU[l.m][0]} ×${l.q}</span><span class="amt">${yen(MENU[l.m][1]*l.q)}</span></div>`).join('')
-        +x.gone.map(m=>`<div class="line z"><span class="nm">${multi?'席'+x.n+' ':''}${MENU[m][0]}</span><span class="amt">取消</span></div>`).join('')).join('')
-        +(r.pamph?`<div class="line"><span class="nm">パンフレット ×${r.pamph}</span><span class="amt">${yen(pamphAmt(r.pamph))}</span></div>`:'')
-        +(r.disc?`<div class="line"><span class="nm">値引き</span><span class="amt">−${yen(r.disc)}</span></div>`:'')
+      const nm=x=>multi?'席'+x.n+' ':'';
+      det=`<div class="hdet">`+r.seats.map((x,si)=>x.lines.map((l,li)=>`<div class="line ${l.q?'':'z'}"><span class="nm">${nm(x)}${MENU[l.m][0]}</span><span class="amt">${yen(MENU[l.m][1]*l.q)}</span>${stpH('hq',r.id+':'+si+':'+li,l.q)}</div>`).join('')).join('')
+        +`<div class="line ${r.pamph?'':'z'}"><span class="nm">パンフレット</span><span class="amt">${yen(pamphAmt(r.pamph))}</span>${stpH('hp',r.id,r.pamph)}</div>`
+        +`<div class="line hdsel"><span class="nm">値引き</span><span class="amt">${r.disc?'−'+yen(r.disc):''}</span><button class="dbtn2 ${ui.hdiscId===r.id?'on':''}" data-a="hdopen" data-v="${r.id}">${DISCS[r.di][0]}</button></div>`
+        +(ui.hdiscId===r.id?`<div class="dopts hdsel">${DISCS.map(([t],i)=>`<button class="${r.di===i?'on':''}" data-a="hdisc" data-v="${r.id}:${i}">${t}</button>`).join('')}</div>`:'')
+        +`<div class="line tot"><span>合計</span><span class="num">${yen(r.total)}円</span></div>`
+        +(edited(r)?`<div class="orig">はじめ ${yen(r.o.t)}円</div>`:'')
         +(ui.askId===r.id?`<div class="line act"><span class="nm">取り消しますか</span><button class="danger" data-a="hcancel" data-v="${r.id}">はい</button><button data-a="hno">やめる</button></div>`
           :`<div class="line act"><button class="danger" data-a="hask" data-v="${r.id}">取り消す</button></div>`)+`</div>`;
     }
-    return `<div class="hcard"><button class="hbtn ${o?'open':''}" data-a="hopen" data-v="${r.id}"><span class="ht">${r.time}</span><span class="hs">${who}</span><span class="hf">${r.flag?'⚑':''}</span><b class="ha num">${yen(r.total)}円</b></button>${det}</div>`;
+    return `<div class="hcard"><button class="hbtn ${o?'open':''}" data-a="hopen" data-v="${r.id}"><span class="ht">${r.time}</span><span class="hs">${who}</span>${edited(r)?'<span class="fix">直し済み</span>':''}<span class="hf">${r.flag?'⚑':''}</span><b class="ha num">${yen(r.total)}円</b></button>${det}</div>`;
   }).join('');
   return tool+fcs+rows+(!rs.length&&!un.length?`<div class="note">ありません</div>`:'');
 }
 function salesHTML(){
-  const cnt={};st.H.forEach(r=>{r.seats.forEach(x=>x.lines.forEach(l=>{cnt[l.m]=(cnt[l.m]||0)+l.q;}));if(r.pamph)cnt.p=(cnt.p||0)+r.pamph;});
+  const cnt={};st.H.forEach(r=>{r.seats.forEach(x=>x.lines.forEach(l=>{if(l.q>0)cnt[l.m]=(cnt[l.m]||0)+l.q;}));if(r.pamph)cnt.p=(cnt.p||0)+r.pamph;});
   const items=Object.entries(cnt).map(([k,q])=>[k==='p'?'パンフレット':MENU[k][0],q,k==='p'?99:+k]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]);
   return `<div class="srow"><span>合計</span><b id="sTotal" class="num">${yen(salesTotal())}円</b></div>`
     +`<div class="srow"><span>会計の件数</span><b id="sCount">${st.H.length}件</b></div>`
@@ -390,10 +406,10 @@ const A={
   flag(n){if(st.flags[n])delete st.flags[n];else st.flags[n]=true;},
   pay(){
     if(!(st.sel.length||st.pamph>0)||ui.moving||ui.view!=='pay')return;
-    const sn=snap(),seats=selList(),d=discAmt(),fs=seats.filter(n=>st.flags[n]);
-    const rec={id:st.nid++,time:hhmm(new Date()),
-      seats:seats.map(n=>({n,lines:st.S[n].lines.filter(l=>l.q>0).map(l=>({m:l.m,q:l.q})),gone:st.S[n].lines.filter(l=>l.q===0).map(l=>l.m)})),
-      disc:d,pamph:st.pamph,total:totalNow(),flag:fs.length>0,fs};
+    const sn=snap(),seats=selList(),fs=seats.filter(n=>st.flags[n]);
+    const rec=mkRec({id:st.nid++,time:hhmm(new Date()),
+      seats:seats.map(n=>({n,lines:st.S[n].lines.map(l=>({m:l.m,q:l.q}))})),
+      di:seats.length?st.disc:0,pamph:st.pamph,flag:fs.length>0,fs});
     st.H.unshift(rec);
     seats.forEach(n=>{st.S[n]={st:'empty',lines:[]};delete st.flags[n];});
     const pn=st.pamph;st.sel=[];st.disc=0;st.pamph=0;ui.discOpen=false;ui.hint=false;
@@ -426,19 +442,23 @@ const A={
   mtab(v){ui.mtab=v;},
   flagsopen(){ui.modal=true;ui.mtab='hist';ui.histFlag=true;ui.openId=null;ui.askId=null;},
   histflag(){ui.histFlag=!ui.histFlag;},
-  hopen(v){ui.openId=ui.openId===+v?null:+v;ui.askId=null;},
+  hopen(v){ui.openId=ui.openId===+v?null:+v;ui.askId=null;ui.hdiscId=null;},
   hask(v){ui.askId=+v;},
   hno(){ui.askId=null;},
+  hq(v){const [id,si,li,d]=v.split(':').map(Number),r=st.H.find(x=>x.id===id);if(!r)return;const l=r.seats[si].lines[li];l.q=Math.max(0,l.q+d);rCalc(r);},
+  hp(v){const [id,d]=v.split(':').map(Number),r=st.H.find(x=>x.id===id);if(!r)return;r.pamph=Math.max(0,r.pamph+d);rCalc(r);},
+  hdopen(v){ui.hdiscId=ui.hdiscId===+v?null:+v;},
+  hdisc(v){const [id,i]=v.split(':').map(Number),r=st.H.find(x=>x.id===id);if(!r)return;r.di=i;rCalc(r);ui.hdiscId=null;},
   hcancel(v){
     const r=st.H.find(x=>x.id===+v);if(!r)return;
     st.H.splice(st.H.indexOf(r),1);
     r.seats.forEach(x=>{
-      const ls=[...x.lines.map(l=>({m:l.m,q:l.q})),...x.gone.map(m=>({m,q:0}))];
+      const ls=x.lines.map(l=>({m:l.m,q:l.q}));
       if(st.S[x.n].st==='unpaid')addLines(st.S[x.n].lines,ls);
       else st.S[x.n]={st:'unpaid',lines:ls.map(l=>({id:st.nid++,m:l.m,q:l.q}))};
     });
     (r.fs||[]).forEach(n=>{st.flags[n]=true;});
-    ui.openId=null;ui.askId=null;
+    ui.openId=null;ui.askId=null;ui.hdiscId=null;
   },
   mvkind(v){st.mv.kind=v;},
   mvadd(){const a=num(st.mv.amt);if(!a)return;st.cash.moves.push({kind:st.mv.kind,amt:a,memo:st.mv.memo.trim()});st.mv.amt='';st.mv.memo='';},
@@ -447,6 +467,7 @@ const A={
 };
 document.addEventListener('click',e=>{
   if(ui.discOpen&&!e.target.closest('.drow'))ui.discOpen=false;
+  if(ui.hdiscId!==null&&!e.target.closest('.hdsel'))ui.hdiscId=null;
   const ov=e.target.closest('.ov');
   if(ov&&e.target===ov){ui.modal=false;render();return;}
   const b=e.target.closest('[data-a]');
