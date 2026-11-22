@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>作る・運ぶ画面の比較</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#fff}
+body{height:100dvh;display:flex;flex-direction:column;color:#222;font-size:14px;
+  font-family:-apple-system,"Hiragino Sans","Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:#222;cursor:pointer;margin:0;border:1px solid #ccc;background:#fff;border-radius:8px;padding:5px 10px;min-height:36px;line-height:1.2;white-space:nowrap}
+button:active{opacity:.8}
+button.on{background:#1d5fb8;border-color:#1d5fb8;color:#fff}
+
+/* 上の帯 */
+.top{flex:none;border-bottom:1px solid #e3e3e3;background:#fff;padding:6px 12px;display:flex;flex-direction:column;gap:6px}
+.r1{display:flex;align-items:center;gap:8px}
+.r1 .vb{min-width:96px;min-height:40px;font-weight:700;font-size:15px}
+.r1 small{color:#999;font-size:11px;margin-left:2px}
+.flt{display:flex;flex-wrap:wrap;gap:6px}
+.flt button{min-height:34px;padding:4px 10px;font-size:13px}
+
+main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.view{flex:1;min-height:0;display:flex;flex-direction:column}
+.sortbar{flex:none;display:flex;align-items:center;gap:6px;padding:6px 12px}
+.sortbar button{min-height:34px;font-size:13px}
+.scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* 案A */
+.g{display:grid;grid-template-columns:minmax(0,1fr) 64px 56px 64px;column-gap:4px;align-items:center;padding:0 8px 0 6px;border-left:4px solid transparent}
+.hd{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #ccc;min-height:28px;color:#666;font-size:12px;font-weight:700;text-align:center}
+.hd span:first-child{text-align:left}
+.row{min-height:76px;padding-top:6px;padding-bottom:6px;border-bottom:1px solid #eee;background:#fff;transition:opacity .2s}
+.row.sep{border-top:2px solid #bbb}
+.row .nm{min-width:0;font-size:20px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.row .nm .q{font-size:18px;margin-left:4px;white-space:nowrap}
+.seat{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+.seat small{font-size:12px;color:#555;margin-right:2px}
+.seat b{font-size:22px;font-weight:700}
+
+.ck{width:64px;height:64px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;justify-self:center}
+.ck .lb{font-size:11px;color:#555;line-height:1.2}
+.ck svg{width:30px;height:30px;color:#ccc;display:block}
+.ck.on .lb{color:#fff}
+.ck.on svg{color:#fff}
+.g.mk,.ln.mk{border-left-color:#1d5fb8}
+.g.long,.th.long{border-left-color:#d32f2f}
+.fade{opacity:.35}
+.new{background:#eaf2fc!important}
+
+/* 案B */
+#lb{padding:8px 12px 16px;display:grid;grid-template-columns:1fr;gap:12px;grid-auto-rows:max-content;align-content:start;align-items:start}
+@media(min-width:700px){#lb{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tk{border:1px solid #ccc;border-radius:8px;background:#fff;overflow:hidden;transition:opacity .2s}
+.tk.fade{opacity:.5}
+.th{display:flex;align-items:center;gap:6px;min-height:46px;padding:4px 10px 4px 8px;border-left:4px solid transparent;border-bottom:1px solid #e3e3e3}
+.th small{font-size:13px;color:#555}
+.th b{font-size:26px;font-weight:700}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) 60px 60px;column-gap:4px;align-items:center;min-height:68px;padding:4px 8px 4px 6px;border-left:4px solid transparent;border-bottom:1px solid #eee;background:#fff;transition:opacity .2s}
+.ln:last-child{border-bottom:0}
+.ln .nm{min-width:0;font-size:18px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.ln .nm .q{margin-left:4px;white-space:nowrap}
+.ln .ck{width:60px;height:60px}
+.ln.fade{opacity:.35}
+
+/* トースト */
+#toast{position:absolute;left:12px;right:12px;bottom:12px;max-width:440px;margin:0 auto;display:flex;align-items:center;gap:8px;background:#222;color:#fff;border-radius:8px;padding:6px 6px 6px 12px;z-index:9}
+#toast span{flex:1;min-width:0}
+#toast button{background:#fff;color:#1d5fb8;border-color:#fff;font-weight:700;min-height:36px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="r1">
+    <button class="vb on" data-view="a">A 一覧</button>
+    <button class="vb" data-view="b">B 伝票</button>
+    <small>見本用</small>
+  </div>
+  <div class="flt" id="flt"></div>
+</div>
+<main>
+  <div class="view" id="va">
+    <div class="sortbar"><button class="sb on" data-sort="t">来た順</button><button class="sb" data-sort="i">品ごと</button></div>
+    <div class="scroll" id="la">
+      <div class="g hd"><span>作る物</span><span>作った</span><span>席</span><span>持ってった</span></div>
+    </div>
+  </div>
+  <div class="view" id="vb" hidden>
+    <div class="scroll" id="lb"></div>
+  </div>
+  <div id="toast" hidden><span></span><button id="undo">元に戻す</button></div>
+</main>
+<script>
+const CATS=["フード","ホットドリンク","スイーツ","アイスドリンク","オリジナルドリンク"];
+const CAT={"ホットサンド":0,"カレーライス":0,"トースト":0,
+ "コーヒー HOT":1,"紅茶 HOT":1,"ココア":1,"カフェラテ":1,
+ "マフィン":2,"クッキー":2,"プリン":2,
+ "コーヒー ICE":3,"紅茶 ICE":3,"オレンジジュース":3,
+ "永遠の愛":4,"誰もが憧れるベリーソーダ":4,"自由を求めるクリームソーダ":4,"革命の歌 明日への希望を掲げて":4};
+const CHECK='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LONG=10*60000, FADE=1500;
+const T0=Date.now();
+// [何分前, 席, [[品,数,作った済み?]...]]
+const SEED=[
+ [11.8,34,[["カレーライス",2,1],["コーヒー HOT",2,1]]],
+ [11.2,7,[["カフェラテ",1,1],["マフィン",1]]],
+ [9.5,52,[["ホットサンド",1,1],["コーヒー HOT",1],["プリン",1]]],
+ [9.4,12,[["カレーライス",1],["カフェラテ",1,1]]],
+ [9.3,71,[["コーヒー ICE",1]]],
+ [9.2,3,[["トースト",1],["紅茶 HOT",1],["クッキー",2],["ココア",1]]],
+ [9.1,45,[["コーヒー HOT",1],["永遠の愛",1]]],
+ [9.0,87,[["カレーライス",1],["誰もが憧れるベリーソーダ",1]]],
+ [7.5,20,[["カフェラテ",2]]],
+ [6,61,[["コーヒー HOT",1],["マフィン",1],["オレンジジュース",1]]],
+ [4.5,9,[["自由を求めるクリームソーダ",1],["革命の歌 明日への希望を掲げて",1]]],
+ [3,38,[["コーヒー HOT",1],["カレーライス",1]]],
+ [1.5,26,[["紅茶 ICE",1],["カフェラテ",1]]],
+ [0.4,79,[["ホットサンド",1],["コーヒー HOT",2]]]
+];
+const LATER=[
+ [15,[["コーヒー HOT",1],["ホットサンド",1]]],
+ [63,[["カレーライス",1],["プリン",1],["カフェラテ",1]]],
+ [41,[["クッキー",1],["紅茶 HOT",1]]],
+ [2,[["コーヒー ICE",1],["マフィン",1]]],
+ [84,[["カフェラテ",1],["カレーライス",2]]]
+];
+
+const tickets=[], lines=[];
+let nid=1,lid=1,laterIdx=0;
+const ui={view:'a',sort:'t',cat:-1};
+const $=s=>document.querySelector(s);
+const listA=$('#la'), listB=$('#lb');
+
+function mk(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function ckBtn(l,k){
+  const b=mk('button','ck',`<span class="lb">${k==='made'?'作った':'持ってった'}</span>${CHECK}`);
+  b.dataset.l=l.id;b.dataset.k=k;b.setAttribute('aria-pressed','false');return b;
+}
+function nameHtml(l){return `${l.item}${l.qty>1?`<span class="q">×${l.qty}</span>`:''}`;}
+
+function addTicket(seat,at,items,isNew){
+  const t={id:nid++,seat,at,gone:false,timer:null,lines:[]};
+  tickets.push(t);
+  t.el=mk('div','tk');t.el.dataset.t=t.id;
+  t.hdr=mk('div','th',`<small>席</small><b>${seat}</b>`);t.el.appendChild(t.hdr);
+  items.forEach(([item,qty,made])=>{
+    const l={id:lid++,t,item,qty,cat:CAT[item],made:!!made,carried:false,gone:false,timer:null,prev:null};
+    t.lines.push(l);lines.push(l);
+    // 案A の行
+    const r=mk('div','g row');r.dataset.l=l.id;r.dataset.at=at;r.dataset.item=item;
+    r.appendChild(mk('div','nm',nameHtml(l)));
+    l.bA=ckBtn(l,'made');r.appendChild(l.bA);
+    r.appendChild(mk('div','seat',`<small>席</small><b>${seat}</b>`));
+    l.cA=ckBtn(l,'carried');r.appendChild(l.cA);
+    l.rowA=r;
+    // 案B の行
+    const n=mk('div','ln');n.dataset.l=l.id;
+    n.appendChild(mk('div','nm',nameHtml(l)));
+    l.bB=ckBtn(l,'made');n.appendChild(l.bB);
+    l.cB=ckBtn(l,'carried');n.appendChild(l.cB);
+    l.rowB=n;t.el.appendChild(n);
+    if(isNew){markNew(l);}
+    patchLine(l);
+  });
+  patchTicket(t);
+  return t;
+}
+function markNew(l){
+  l.rowA.classList.add('new');l.rowB.classList.add('new');
+  setTimeout(()=>{l.rowA.classList.remove('new');l.rowB.classList.remove('new');},3000);
+}
+
+const isDone=l=>l.made&&l.carried;
+const waitLong=t=>Date.now()-t.at>=LONG;
+function patchLine(l){
+  const done=isDone(l), mkd=l.made&&!l.carried, lg=!done&&waitLong(l.t);
+  for(const [r,a,b] of [[l.rowA,l.bA,l.cA],[l.rowB,l.bB,l.cB]]){
+    r.classList.toggle('fade',done);
+    r.classList.toggle('mk',mkd);
+    r.classList.toggle('long',lg&&r===l.rowA);
+    a.classList.toggle('on',l.made);a.setAttribute('aria-pressed',l.made);
+    b.classList.toggle('on',l.carried);b.setAttribute('aria-pressed',l.carried);
+  }
+}
+function patchTicket(t){
+  const all=t.lines.every(isDone);
+  t.el.classList.toggle('fade',all);
+  t.hdr.classList.toggle('long',!all&&waitLong(t));
+}
+
+// ---- 並べ直し（行が消える・新しい注文・並べ替え・持ち場を変えたときだけ）
+function setChildren(parent,els,skip){
+  const base=skip||0;
+  els.forEach((el,i)=>{const cur=parent.children[base+i];if(cur!==el)parent.insertBefore(el,cur||null);});
+  while(parent.children.length>base+els.length)parent.removeChild(parent.lastChild);
+}
+const match=l=>ui.cat<0||l.cat===ui.cat;
+function reflow(){
+  // A
+  const vis=lines.filter(l=>!l.gone&&match(l));
+  if(ui.sort==='i'){
+    const first={};vis.forEach(l=>{const a=l.t.at;if(!(l.item in first)||a<first[l.item])first[l.item]=a;});
+    vis.sort((x,y)=>first[x.item]-first[y.item]||(x.item<y.item?-1:x.item>y.item?1:0)||x.t.at-y.t.at||x.id-y.id);
+  }else vis.sort((x,y)=>x.t.at-y.t.at||x.id-y.id);
+  setChildren(listA,vis.map(l=>l.rowA),1);
+  vis.forEach((l,i)=>l.rowA.classList.toggle('sep',ui.sort==='i'&&i>0&&vis[i-1].item!==l.item));
+  // B
+  const tv=tickets.filter(t=>!t.gone&&t.lines.some(match)).sort((x,y)=>x.at-y.at||x.id-y.id);
+  tickets.forEach(t=>t.lines.forEach(l=>{l.rowB.hidden=!match(l);}));
+  setChildren(listB,tv.map(t=>t.el));
+}
+
+// ---- 押す
+function press(l,k){
+  l.prev={made:l.made,carried:l.carried};
+  if(k==='made'){l.made=!l.made;if(!l.made)l.carried=false;}
+  else{l.carried=!l.carried;if(l.carried)l.made=true;}
+  after(l);
+}
+function after(l){
+  const t=l.t;patchLine(l);patchTicket(t);
+  // 行
+  if(isDone(l)){
+    if(!l.timer&&!l.gone)l.timer=setTimeout(()=>{l.timer=null;if(!isDone(l))return;l.gone=true;reflow();if(ui.view==='a')showToast(`${l.item}（席 ${t.seat}）が済みました`,l);},FADE);
+  }else{
+    clearTimeout(l.timer);l.timer=null;
+    if(l.gone){l.gone=false;reflow();}
+  }
+  // 伝票
+  if(t.lines.every(isDone)){
+    if(!t.timer&&!t.gone)t.timer=setTimeout(()=>{t.timer=null;if(!t.lines.every(isDone))return;t.gone=true;reflow();if(ui.view==='b')showToast(`席 ${t.seat} が済みました`,l);},FADE);
+  }else{
+    clearTimeout(t.timer);t.timer=null;
+    if(t.gone){t.gone=false;reflow();}
+  }
+}
+
+// ---- トースト
+let toast=null,toastTimer=null;
+function showToast(msg,l){
+  toast=l;$('#toast span').textContent=msg;$('#toast').hidden=false;
+  clearTimeout(toastTimer);toastTimer=setTimeout(hideToast,5000);
+}
+function hideToast(){toast=null;$('#toast').hidden=true;}
+$('#undo').onclick=()=>{
+  if(!toast)return;const l=toast;hideToast();
+  if(l.prev){l.made=l.prev.made;l.carried=l.prev.carried;}
+  l.gone=false;l.t.gone=false;after(l);reflow();
+};
+
+// ---- 画面の操作
+listA.addEventListener('click',onCk);listB.addEventListener('click',onCk);
+function onCk(e){
+  const b=e.target.closest('.ck');if(!b)return;
+  press(lines.find(l=>l.id==b.dataset.l),b.dataset.k);
+}
+document.querySelectorAll('.vb').forEach(b=>b.onclick=()=>{
+  ui.view=b.dataset.view;
+  document.querySelectorAll('.vb').forEach(x=>x.classList.toggle('on',x===b));
+  $('#va').hidden=ui.view!=='a';$('#vb').hidden=ui.view!=='b';
+  hideToast();
+});
+document.querySelectorAll('.sb').forEach(b=>b.onclick=()=>{
+  ui.sort=b.dataset.sort;
+  document.querySelectorAll('.sb').forEach(x=>x.classList.toggle('on',x===b));
+  reflow();
+});
+const flt=$('#flt');
+["全部",...CATS].forEach((n,i)=>{
+  const b=mk('button',i===0?'on':'',n);b.dataset.cat=i-1;
+  b.onclick=()=>{ui.cat=i-1;flt.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));reflow();};
+  flt.appendChild(b);
+});
+
+// ---- 起動
+SEED.forEach(([m,seat,items])=>addTicket(seat,T0-m*60000,items,false));
+reflow();
+setInterval(()=>{lines.forEach(patchLine);tickets.forEach(patchTicket);},15000);
+setInterval(()=>{
+  if(laterIdx>=LATER.length)return;
+  const [seat,items]=LATER[laterIdx++];
+  const t=addTicket(seat,Date.now(),items,true);
+  reflow();
+},12000);
+</script>
+</body>
+</html>
